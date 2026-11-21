@@ -155,6 +155,14 @@ flowchart LR
 
 The running demo currently uses `InMemoryDatabase` in `backend/app/services/db.py`, seeded at startup. The SQL migrations describe the production PostGIS design; a live Supabase/Postgres repository is not yet connected to the FastAPI runtime.
 
+## Detailed Documentation
+
+- [ARCHITECTURE.md](ARCHITECTURE.md) — detailed Mermaid system architecture, request paths, runtime modules, and deployment boundaries.
+- [DB.md](DB.md) — Mermaid entity-relationship model, PostGIS spatial design, privacy boundaries, indexes, and trust integrity.
+- [WORKFLOW.md](WORKFLOW.md) — detailed crop-outbreak, DBSCAN, salinity, multi-location trend, and trust-verification workflows.
+
+Use these three guides alongside this README: the README explains the product and judge story, `ARCHITECTURE.md` explains component relationships, `DB.md` explains data ownership and spatial storage, and `WORKFLOW.md` explains how a field observation becomes a verified action.
+
 ## Database Design
 
 | Table | Purpose | Spatial/integrity details |
