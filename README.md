@@ -163,6 +163,47 @@ The running demo currently uses `InMemoryDatabase` in `backend/app/services/db.p
 
 Use these three guides alongside this README: the README explains the product and judge story, `ARCHITECTURE.md` explains component relationships, `DB.md` explains data ownership and spatial storage, and `WORKFLOW.md` explains how a field observation becomes a verified action.
 
+## Screenshots to Add
+
+Place final screenshots in `docs/screenshots/` using the filenames below. These placeholders make the README ready for visual evidence without committing browser chrome or personal data.
+
+### 1. Live Map and outbreak overview
+
+<!-- Screenshot placeholder: Live Map showing Kuttanad pins, canals, DBSCAN circles, telemetry, and the “Show All Data” control. -->
+![Live Map and outbreak overview](docs/screenshots/01-live-map-overview.png)
+
+### 2. Filters and visible-layer controls
+
+<!-- Screenshot placeholder: Filters & Find Trend panel showing category, disease, verification, time-window, and Reports/Clusters/Canals toggles. -->
+![Filters and visible layers](docs/screenshots/02-filters-and-layers.png)
+
+### 3. Multi-location DBSCAN trend analysis
+
+<!-- Screenshot placeholder: selected location, 3 km ring, highlighted cluster, cluster/noise counts, current-vs-prior counts, and canal status. -->
+![DBSCAN trend analysis](docs/screenshots/03-dbscan-trend-analysis.png)
+
+### 4. Gemini Leaf Scan result
+
+<!-- Screenshot placeholder: real demo leaf image, disease name, confidence, visual clues, and vetted KAU action plan. -->
+![Gemini leaf diagnosis](docs/screenshots/04-gemini-leaf-scan.png)
+
+### 5. Uncertain diagnosis safety state
+
+<!-- Screenshot placeholder: blurry sample showing “Not sure — ask your Krishi Bhavan” and no chemical advice. -->
+![Uncertain diagnosis safety state](docs/screenshots/05-uncertain-safety-state.png)
+
+### 6. Report and trust verification lifecycle
+
+<!-- Screenshot placeholder: submitted map report, Verify Queue confirmation state, and officer verification view. -->
+![Report and trust verification](docs/screenshots/06-trust-verification.png)
+
+### Screenshot capture guidance
+
+- Use a clean 1440×900 or 1280×800 browser viewport.
+- Capture the app only; exclude browser tabs, API keys, phone numbers, and personal GPS details.
+- Prefer one screenshot per capability, with the important panel fully visible.
+- For the strongest demo set, capture Pulincunnoo, Alappuzha, Kumarakom, or Palakkad as the selected trend location.
+
 ## Database Design
 
 | Table | Purpose | Spatial/integrity details |
