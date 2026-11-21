@@ -29,11 +29,17 @@ async def _gemini_diagnose(image_bytes: bytes, mime_type: str) -> LeafDiagnosisS
         from google.genai import types
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
         prompt = """Identify the most likely Kuttanad rice leaf disease or pest from this image. Return only structured JSON. Use one of: brown_planthopper, sheath_blight, bacterial_leaf_blight, rice_blast, sheath_rot, brown_leaf_spot, rice_tungro, unknown. Do not provide treatment, chemical names, or dosages. Confidence must reflect image quality."""
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[types.Part.from_bytes(data=image_bytes, mime_type=mime_type), prompt],
-            config=types.GenerateContentConfig(response_mime_type="application/json", response_json_schema=LeafDiagnosisSchema.model_json_schema()),
-        )
+        contents = [types.Part.from_bytes(data=image_bytes, mime_type=mime_type), prompt]
+        config = types.GenerateContentConfig(response_mime_type="application/json", response_json_schema=LeafDiagnosisSchema.model_json_schema())
+        try:
+            response = client.models.generate_content(model=settings.GEMINI_MODEL, contents=contents, config=config)
+        except Exception as first_error:
+            # Google currently returns 404 for gemini-2.5-flash on some new accounts.
+            # Preserve the requested primary model but use Google's recommended compatible fallback.
+            if settings.GEMINI_MODEL == "gemini-2.5-flash" and ("404" in str(first_error) or "no longer available" in str(first_error)):
+                response = client.models.generate_content(model="gemini-3.8-flash", contents=contents, config=config)
+            else:
+                raise
         parsed = getattr(response, "parsed", None)
         if parsed is not None:
             return LeafDiagnosisSchema.model_validate(parsed)

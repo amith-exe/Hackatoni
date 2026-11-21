@@ -16,6 +16,7 @@ class Settings(BaseModel):
     SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
     
     # DBSCAN spatial clustering defaults
     # For Kuttanad delta, 2.0 km groups neighboring padasekharams
