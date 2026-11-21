@@ -139,3 +139,41 @@ class OfficerDashboardResponse(BaseModel):
     active_clusters: List[ClusterResponse]
     critical_canals: List[CanalSegmentResponse]
     digest_summary: Dict[str, Any]
+
+class AlertItem(BaseModel):
+    id: str
+    category: str = Field(..., description="salinity | cluster | verification")
+    title: str
+    description: str
+    alert_level: AlertLevel
+    timestamp: datetime
+    location: Optional[Dict[str, float]] = None
+    is_read: bool = False
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+class LocalTrendResponse(BaseModel):
+    query_latitude: float
+    query_longitude: float
+    nearest_landmark: str
+    nearby_reports_count_7d: int
+    prior_7d_reports_count: int
+    trend_direction: str  # "Growing", "Stable", "Watch"
+    nearest_canal_name: Optional[str] = None
+    nearest_canal_distance_km: float
+    nearest_canal_salinity_ppt: Optional[float] = None
+    nearest_canal_alert_level: Optional[AlertLevel] = None
+    active_outbreak_nearby: bool
+    nearest_cluster_name: Optional[str] = None
+    recommended_action: str
+    reports_nearby: List[ReportResponse] = Field(default_factory=list)
+
+class DemoLoginRequest(BaseModel):
+    name: str
+    phone: str
+    padasekharam: str
+    role: str = "farmer"
+
+class DemoLoginResponse(BaseModel):
+    token: str
+    profile: Dict[str, Any]
+    message: str

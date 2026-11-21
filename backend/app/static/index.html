@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Karshakan Lens - Kuttanad Polder Early Warning</title>
+  <title>Karshakan Lens - Kuttanad Polder Early Warning Network</title>
   <link rel="manifest" href="/static/manifest.json">
   <meta name="theme-color" content="#15803d">
   <!-- Tailwind CSS CDN -->
@@ -39,14 +39,14 @@
       width: 100% !important;
       height: 100% !important;
       min-height: 480px !important;
-      background-color: #d1d5db;
+      background-color: #e2e8f0;
     }
     #reportMapPicker {
-      height: 250px !important;
-      min-height: 250px !important;
+      height: 240px !important;
+      min-height: 240px !important;
       width: 100% !important;
       border-radius: 0.75rem;
-      background-color: #d1d5db;
+      background-color: #e2e8f0;
       z-index: 10;
     }
     .custom-pin {
@@ -55,63 +55,77 @@
       cursor: pointer; transition: transform 0.2s;
     }
     .custom-pin:hover { transform: scale(1.15); }
-    .pulse-danger { animation: pulse-red 2s infinite; }
-    @keyframes pulse-red {
-      0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
-      70% { box-shadow: 0 0 0 14px rgba(220, 38, 38, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
-    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col antialiased">
-  <!-- Top Notification & Demo User Bar -->
-  <header class="bg-white/95 backdrop-blur border-b border-emerald-100 shadow-sm sticky top-0 z-50">
-    <div class="bg-emerald-800 text-white text-xs px-3 py-1.5 flex flex-wrap items-center justify-between gap-2">
-      <div class="flex items-center gap-1.5 font-medium">
+<body class="bg-gray-50 min-h-screen flex flex-col antialiased text-gray-900">
+
+  <!-- Top Telemetry & Network Header -->
+  <header class="bg-white/95 backdrop-blur border-b border-gray-200 shadow-sm sticky top-0 z-50">
+    <div class="bg-emerald-900 text-white text-xs px-3 py-1.5 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2 font-medium">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span>കുട്ടനാട് നെല്ല് - താറാവ് മുൻകരുതൽ നെറ്റ്‌വർക്ക്</span>
-        <span class="hidden sm:inline text-emerald-200">| Kuttanad Polder Early Warning</span>
+        <span id="txtNetworkName">Kuttanad Polder Early-Warning Network</span>
+        <span class="hidden sm:inline text-emerald-300">| Agro-Hydrology Platform</span>
       </div>
       <div class="flex items-center gap-2">
-        <div class="flex items-center gap-1 bg-emerald-900/80 px-2 py-0.5 rounded border border-emerald-700/60">
-          <span class="text-[11px] text-emerald-200">User:</span>
-          <select id="userSelector" class="bg-transparent text-white text-[11px] font-semibold focus:outline-none cursor-pointer">
-            <option value="22222222-2222-2222-2222-222222222201" class="text-gray-900">🌾 Thomas Kutty (Farmer - Pulincunnoo)</option>
-            <option value="22222222-2222-2222-2222-222222222202" class="text-gray-900">🌾 Radhakrishnan M. (Farmer - Moncompu)</option>
-            <option value="22222222-2222-2222-2222-222222222204" class="text-gray-900">🏛️ Sreedhar P. (Krishi Officer - Champakulam)</option>
-          </select>
-        </div>
-        <a href="tel:18001801551" class="hidden sm:inline text-[11px] bg-emerald-700 hover:bg-emerald-600 px-2 py-0.5 rounded transition">
-          📞 Kisan: 1800-180-1551
+        <!-- EN / ML Language Toggle -->
+        <button onclick="toggleLang()" class="flex items-center gap-1 bg-emerald-800 hover:bg-emerald-700 px-2 py-0.5 rounded-lg border border-emerald-600/60 text-[11px] font-bold transition">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+          <span id="btnLangText">ML</span>
+        </button>
+
+        <!-- Test Login / Switch User -->
+        <button onclick="openDemoLoginModal()" class="flex items-center gap-1 bg-emerald-800 hover:bg-emerald-700 px-2.5 py-0.5 rounded-lg border border-emerald-600/60 text-[11px] font-bold transition">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          <span id="currentUserNameLabel">Thomas Kutty</span>
+        </button>
+
+        <a href="tel:18001801551" class="hidden md:flex items-center gap-1 text-[11px] bg-emerald-800 hover:bg-emerald-700 px-2 py-0.5 rounded-lg border border-emerald-600/60 transition">
+          <svg class="w-3 h-3 text-emerald-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span>Kisan: 1800-180-1551</span>
         </a>
       </div>
     </div>
 
     <!-- Navigation Header -->
-    <div class="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between">
+    <div class="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between">
       <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-700 to-green-500 flex items-center justify-center text-white shadow-md font-bold text-lg">
-          🛡️
+        <div class="w-9 h-9 rounded-xl bg-emerald-800 flex items-center justify-center text-white shadow-sm font-bold">
+          <svg class="w-5 h-5 text-emerald-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
         <div>
-          <h1 class="font-extrabold text-gray-900 text-base leading-tight flex items-center gap-1.5">
+          <h1 class="font-extrabold text-gray-900 text-sm sm:text-base leading-tight flex items-center gap-1.5">
             <span>Karshakan Lens</span>
-            <span class="text-xs font-semibold px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded">PWA</span>
+            <span class="text-[10px] font-bold px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded">PWA</span>
           </h1>
-          <p class="text-[11px] text-emerald-700 font-medium">കർഷകൻ ലെൻസ് • കുട്ടനാട്</p>
+          <p class="text-[10px] sm:text-[11px] text-emerald-700 font-semibold" id="txtTagline">Community-Verified Agro-Hydrology Platform</p>
         </div>
       </div>
 
       <!-- Navigation Tabs -->
-      <nav class="flex items-center gap-1 sm:gap-2">
-        <button id="navMap" onclick="switchView('map')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white shadow-sm flex items-center gap-1.5">
-          <span>🗺️ Live Map</span>
+      <nav class="flex items-center gap-1 sm:gap-1.5">
+        <button id="navMap" onclick="switchView('map')" class="px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-700 text-white shadow-sm flex items-center gap-1.5 transition">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+          <span id="navLiveMapLabel">Live Map</span>
         </button>
-        <button id="navReport" onclick="switchView('report')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-600 hover:text-emerald-800 hover:bg-emerald-50 flex items-center gap-1.5">
-          <span>📢 Report</span>
+        <button id="navReport" onclick="switchView('report')" class="px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 hover:text-emerald-800 hover:bg-gray-100 flex items-center gap-1.5 transition">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          <span id="navReportLabel">Report</span>
         </button>
-        <button id="navVerify" onclick="switchView('verify')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-600 hover:text-emerald-800 hover:bg-emerald-50 flex items-center gap-1.5">
-          <span>🛡️ Verify Queue</span>
+        <button id="navVerify" onclick="switchView('verify')" class="px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 hover:text-emerald-800 hover:bg-gray-100 flex items-center gap-1.5 transition">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span id="navVerifyLabel">Verify</span>
+        </button>
+        <button id="navAlerts" onclick="switchView('alerts')" class="relative px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 hover:text-emerald-800 hover:bg-gray-100 flex items-center gap-1.5 transition">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          <span id="navAlertsLabel">Alerts</span>
+          <span id="alertsBadge" class="hidden absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+        </button>
+        <button onclick="openHowItWorksModal()" class="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <span id="navHowItWorksLabel">How It Works</span>
         </button>
       </nav>
     </div>
@@ -121,49 +135,119 @@
   <div id="viewMap">
     <!-- Telemetry Bar -->
     <div class="bg-white/95 backdrop-blur border-b border-gray-200 px-4 py-2 z-10 shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs">
-      <div class="flex items-center gap-3 overflow-x-auto py-0.5">
-        <div class="flex items-center gap-1.5 font-bold text-gray-800">
+      <div class="flex items-center gap-3 overflow-x-auto py-0.5 no-scrollbar">
+        <div class="flex items-center gap-1.5 font-bold text-gray-800 shrink-0">
           <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
           <span>Reports: <b id="statReportsCount">0</b></span>
         </div>
-        <div class="flex items-center gap-1.5 font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded-lg border border-red-200">
-          <span>🌊 Saline Ingress: <b id="statSalinityAlerts">0 Segments</b></span>
+        <div class="flex items-center gap-1.5 font-bold text-red-700 bg-red-50 px-2.5 py-1 rounded-xl border border-red-200 shrink-0">
+          <svg class="w-3.5 h-3.5 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>
+          <span>Saline Ingress: <b id="statSalinityAlerts">0 Danger</b></span>
         </div>
-        <div class="flex items-center gap-1.5 font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">
-          <span>⚠️ Outbreaks: <b id="statOutbreaksCount">0</b></span>
+        <div class="flex items-center gap-1.5 font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-200 shrink-0">
+          <svg class="w-3.5 h-3.5 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          <span>Active Outbreaks: <b id="statOutbreaksCount">0</b></span>
         </div>
-        <div class="flex items-center gap-1.5 text-blue-900 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200">
-          <span>🌧️ Rain (24h): <b id="statRainfall">-- mm</b></span>
+        <div class="flex items-center gap-1.5 text-blue-900 bg-blue-50 px-2.5 py-1 rounded-xl border border-blue-200 shrink-0">
+          <svg class="w-3.5 h-3.5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/></svg>
+          <span>Rain (24h): <b id="statRainfall">-- mm</b></span>
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <button onclick="switchView('report')" class="flex items-center gap-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-1.5 rounded-xl shadow text-xs">
-          <span>+ Report Incident</span>
+        <button onclick="toggleLocalTrendPanel()" class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded-xl text-xs transition border border-gray-200">
+          <svg class="w-3.5 h-3.5 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+          <span>Local Outlook</span>
+        </button>
+        <button onclick="switchView('report')" class="flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold px-3 py-1.5 rounded-xl shadow transition text-xs">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          <span id="btnReportIncidentLabel">Report Issue</span>
         </button>
       </div>
     </div>
 
-    <!-- Map Container -->
+    <!-- Map Canvas Container -->
     <div class="map-canvas-container">
       <div id="map"></div>
 
-      <!-- Demo Seed Banner -->
-      <div id="seedBanner" class="absolute top-3 left-3 right-3 sm:left-6 sm:right-auto z-[400] max-w-md bg-emerald-900/90 text-white backdrop-blur px-3 py-2 rounded-xl text-xs shadow-lg border border-emerald-700/60 flex items-start gap-2">
-        <span>ℹ️</span>
-        <div class="flex-1">
-          <span class="font-bold text-emerald-200">Kuttanad Demo Active: </span>
-          Realistic sample pins around Pulincunnoo, Moncompu, and Nedumudy are preloaded. <b>Click anywhere on the map to pin-point a new report!</b>
-        </div>
-        <button onclick="document.getElementById('seedBanner').style.display='none'" class="text-emerald-300 font-bold ml-1">✕</button>
+      <!-- Pin Hint Bar -->
+      <div class="absolute top-3 left-3 right-3 sm:left-4 sm:right-auto z-[400] max-w-lg bg-white/95 backdrop-blur px-3 py-2 rounded-xl text-xs shadow-md border border-emerald-300 flex items-center gap-2">
+        <svg class="w-4 h-4 text-emerald-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span class="font-bold text-gray-800 text-[11px] sm:text-xs" id="mapPinHint">
+          Tap or click anywhere on the map to drop a pin and report an issue there
+        </span>
       </div>
 
-      <!-- Floating Pin Drop Helper -->
-      <div class="absolute top-3 right-3 z-[400] bg-white/95 backdrop-blur px-3 py-1.5 rounded-xl text-xs font-bold shadow-md border border-gray-200 text-emerald-800 hidden sm:flex items-center gap-1.5">
-        <span>📍 Click map to pin report location</span>
+      <!-- Demo Seed Banner -->
+      <div id="seedBanner" class="absolute top-14 left-3 right-3 sm:left-4 sm:right-auto z-[399] max-w-md bg-emerald-900/90 text-white backdrop-blur px-3 py-2 rounded-xl text-xs shadow-lg border border-emerald-700/60 flex items-start gap-2">
+        <svg class="w-4 h-4 text-emerald-300 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <div class="flex-1 text-[11px] leading-relaxed">
+          <span class="font-bold text-emerald-200" id="seedBannerTitle">Kuttanad Demo Mode: </span>
+          <span id="seedBannerText">Realistic delta canal flows, outbreaks, and community reports are active for demonstration. Tap anywhere on the map to pin a new report.</span>
+        </div>
+        <button onclick="document.getElementById('seedBanner').style.display='none'" class="text-emerald-300 hover:text-white font-bold ml-1 p-0.5" aria-label="Dismiss">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Floating Dropped Pin Action Card -->
+      <div id="droppedPinCard" class="hidden absolute bottom-16 sm:bottom-6 left-3 right-3 sm:left-auto sm:right-6 z-[450] sm:w-80 bg-white rounded-2xl shadow-2xl border-2 border-emerald-600 p-3.5 animate-in fade-in">
+        <div class="flex items-start justify-between gap-2 mb-2">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div>
+              <h4 class="font-extrabold text-sm text-gray-900 leading-tight" id="droppedPinTitle">Selected Field Location</h4>
+              <p class="text-[11px] text-gray-500" id="droppedPinCoords">Lat: 9.446 | Lng: 76.458</p>
+            </div>
+          </div>
+          <button onclick="clearDroppedPin()" class="text-gray-400 hover:text-gray-700 p-1">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="flex items-center gap-2 mt-3">
+          <button onclick="reportAtDroppedPin()" class="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-2 px-3 rounded-xl text-xs shadow transition flex items-center justify-center gap-1.5">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <span id="btnReportAtPin">Report Issue at This Pin</span>
+          </button>
+          <button onclick="clearDroppedPin()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 px-3 rounded-xl text-xs transition">
+            Clear Pin
+          </button>
+        </div>
+      </div>
+
+      <!-- Floating Local Trend Panel Container -->
+      <div id="localTrendPanel" class="hidden absolute top-16 left-3 sm:left-4 z-[410] w-[calc(100%-24px)] sm:w-96 max-h-[calc(100%-80px)] overflow-y-auto no-scrollbar bg-white rounded-2xl shadow-xl border border-gray-200 text-xs">
+        <div class="bg-emerald-800 text-white p-3.5 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            <div>
+              <h3 class="font-extrabold text-sm leading-tight" id="trendPanelTitle">Local Field Outlook</h3>
+              <p class="text-[11px] text-emerald-200" id="trendLandmarkLabel">Pulincunnoo Padasekharam</p>
+            </div>
+          </div>
+          <button onclick="locateGPSForTrend()" class="flex items-center gap-1 bg-white/15 hover:bg-white/25 text-white font-bold px-2.5 py-1.5 rounded-xl transition text-[11px] border border-white/20">
+            <svg class="w-3.5 h-3.5 text-emerald-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><circle cx="12" cy="12" r="7"/></svg>
+            <span>Use My GPS</span>
+          </button>
+        </div>
+
+        <!-- Presets -->
+        <div class="p-2.5 bg-gray-50 border-b border-gray-100 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <button onclick="loadLocalTrend(9.446, 76.458)" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-gray-700 border border-gray-200 hover:bg-gray-100">Pulincunnoo</button>
+          <button onclick="loadLocalTrend(9.429, 76.439)" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-gray-700 border border-gray-200 hover:bg-gray-100">Moncompu</button>
+          <button onclick="loadLocalTrend(9.436, 76.404)" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-gray-700 border border-gray-200 hover:bg-gray-100">Nedumudy</button>
+          <button onclick="loadLocalTrend(9.476, 76.392)" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-gray-700 border border-gray-200 hover:bg-gray-100">Kainakary</button>
+          <button onclick="loadLocalTrend(9.420, 76.423)" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-gray-700 border border-gray-200 hover:bg-gray-100">Champakulam</button>
+        </div>
+
+        <div id="trendContent" class="p-3.5 space-y-3">
+          <div class="py-4 text-center text-gray-500 font-semibold">Evaluating localized trends...</div>
+        </div>
       </div>
 
       <!-- Map Legend -->
-      <div class="absolute bottom-3 left-3 z-[400] bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-[11px] shadow border border-gray-200 hidden sm:flex flex-col gap-1">
+      <div class="absolute bottom-3 left-3 z-[400] bg-white/95 backdrop-blur px-3 py-2 rounded-xl text-[11px] shadow border border-gray-200 hidden sm:flex flex-col gap-1">
         <div class="font-bold text-gray-800 text-[10px] uppercase mb-0.5">Verification Legend</div>
         <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span><span>Unconfirmed (0-1 confirms)</span></div>
         <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span><span>Community Confirmed (2+ neighbors)</span></div>
@@ -175,129 +259,157 @@
 
   <!-- VIEW 2: SUBMIT REPORT -->
   <div id="viewReport" class="hidden flex-1 bg-gradient-to-b from-emerald-50/50 to-gray-50 py-4 sm:py-6 overflow-y-auto">
-    <div class="max-w-xl mx-auto p-4">
+    <div class="max-w-2xl mx-auto p-4 pb-20">
       <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-        <div class="bg-emerald-700 text-white p-4 sm:p-5">
+        <div class="bg-emerald-800 text-white p-4 sm:p-5">
           <div class="flex items-center gap-2 mb-1">
-            <span class="text-xl">📢</span>
-            <h2 class="text-lg sm:text-xl font-black">Submit Incident Report</h2>
+            <svg class="w-5 h-5 text-emerald-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            <h2 class="text-lg sm:text-xl font-extrabold" id="formHeaderTitle">Submit Incident Report</h2>
           </div>
-          <p class="text-xs sm:text-sm text-emerald-100">
-            അടിയന്തര മുന്നറിയിപ്പ് നൽകുക • Automatically snapped to canal network
+          <p class="text-xs text-emerald-100" id="formHeaderDesc">
+            Submit field incident to trigger automated hydrological routing and neighbor confirmation
           </p>
         </div>
 
-        <form id="reportForm" onsubmit="handleFormSubmit(event)" class="p-4 sm:p-5 space-y-4">
-          <!-- 1. Five Clean Types -->
-          <div>
-            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">1. Incident Type</label>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <button type="button" onclick="selectType('crop_disease')" id="btn_crop_disease" class="type-btn p-3 rounded-xl border text-left bg-emerald-700 text-white border-emerald-700 shadow-md">
-                <div class="font-black text-sm">🌾 Crop Disease</div>
-                <div class="text-[11px] opacity-90">തവിട്ടു ചാഴി, പോളരോഗം (BPH, Sheath Blight)</div>
+        <form id="reportForm" onsubmit="handleFormSubmit(event)" class="p-4 sm:p-5 space-y-6">
+          <!-- Step 1: What happened? -->
+          <div class="space-y-2">
+            <div class="border-b border-gray-200 pb-1.5">
+              <h3 class="text-sm font-extrabold text-gray-900" id="txtStep1Title">Step 1 — What happened?</h3>
+              <p class="text-[11px] text-gray-500" id="txtStep1Desc">Select the primary issue category affecting your field or channel</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+              <button type="button" onclick="selectType('crop_disease')" id="btn_crop_disease" class="type-btn p-3 rounded-xl border text-left bg-emerald-700 text-white border-emerald-700 shadow-md min-h-[72px]">
+                <div class="font-extrabold text-xs sm:text-sm mb-1 flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-emerald-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>
+                  <span>Crop Disease</span>
+                </div>
+                <div class="text-[11px] text-white/90">Brown Plant Hopper, Sheath Blight, Bacterial Blight</div>
               </button>
-              <button type="button" onclick="selectType('salinity')" id="btn_salinity" class="type-btn p-3 rounded-xl border text-left bg-blue-50 text-blue-800 border-blue-200">
-                <div class="font-black text-sm">🌊 Salinity Ingress</div>
-                <div class="text-[11px] opacity-90">ഉപ്പുവെള്ള കയറ്റം (Salinity > 2.0 ppt)</div>
+              <button type="button" onclick="selectType('salinity')" id="btn_salinity" class="type-btn p-3 rounded-xl border text-left bg-blue-50/50 text-blue-950 border-blue-200 hover:bg-blue-50 min-h-[72px]">
+                <div class="font-extrabold text-xs sm:text-sm mb-1 flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-blue-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>
+                  <span>Salinity Ingress</span>
+                </div>
+                <div class="text-[11px] text-gray-600">Canal water salinity above 2.0 ppt threshold</div>
               </button>
-              <button type="button" onclick="selectType('bird_deaths')" id="btn_bird_deaths" class="type-btn p-3 rounded-xl border text-left bg-rose-50 text-rose-800 border-rose-200">
-                <div class="font-black text-sm">🦆 Duck Mortality</div>
-                <div class="text-[11px] opacity-90">താറാവ് മരണം (Avian Flu Risk)</div>
+              <button type="button" onclick="selectType('bird_deaths')" id="btn_bird_deaths" class="type-btn p-3 rounded-xl border text-left bg-rose-50/50 text-rose-950 border-rose-200 hover:bg-rose-50 min-h-[72px]">
+                <div class="font-extrabold text-xs sm:text-sm mb-1 flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-rose-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  <span>Duck Mortality</span>
+                </div>
+                <div class="text-[11px] text-gray-600">Unexplained bird deaths or Avian Flu symptoms</div>
               </button>
-              <button type="button" onclick="selectType('bund_seepage')" id="btn_bund_seepage" class="type-btn p-3 rounded-xl border text-left bg-amber-50 text-amber-800 border-amber-200">
-                <div class="font-black text-sm">🧱 Bund Seepage</div>
-                <div class="text-[11px] opacity-90">പുറംബണ്ട് ചോർച്ച (Piping Breach)</div>
+              <button type="button" onclick="selectType('bund_seepage')" id="btn_bund_seepage" class="type-btn p-3 rounded-xl border text-left bg-amber-50/50 text-amber-950 border-amber-200 hover:bg-amber-50 min-h-[72px]">
+                <div class="font-extrabold text-xs sm:text-sm mb-1 flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-amber-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <span>Bund Seepage</span>
+                </div>
+                <div class="text-[11px] text-gray-600">Boiling piping breach or outer ring bund crack</div>
               </button>
-              <button type="button" onclick="selectType('crop_loss')" id="btn_crop_loss" class="type-btn p-3 rounded-xl border text-left bg-purple-50 text-purple-800 border-purple-200 sm:col-span-2">
-                <div class="font-black text-sm">📉 Crop Loss</div>
-                <div class="text-[11px] opacity-90">വിളനാശ നഷ്ടപരിഹാര സർവേ (AIMS 72hr)</div>
+              <button type="button" onclick="selectType('crop_loss')" id="btn_crop_loss" class="type-btn p-3 rounded-xl border text-left bg-purple-50/50 text-purple-950 border-purple-200 hover:bg-purple-50 sm:col-span-2 min-h-[72px]">
+                <div class="font-extrabold text-xs sm:text-sm mb-1 flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-purple-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                  <span>Crop Loss</span>
+                </div>
+                <div class="text-[11px] text-gray-600">AIMS 72-hour statutory compensation claim survey</div>
               </button>
             </div>
           </div>
 
-          <!-- 2. Type Specific Inputs -->
-          <div id="dynamicInputs" class="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
-            <!-- Injected dynamically -->
-          </div>
-
-          <!-- 3. Coordinates & Interactive Pin-Point Map -->
-          <div>
-            <div class="flex items-center justify-between mb-1.5">
-              <label class="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1">
-                <span>📍 2. Pin-point Field Location</span>
-                <span class="text-[10px] text-emerald-700 font-semibold">(പാടശേഖര സ്ഥലം)</span>
-              </label>
-              <button type="button" onclick="locateGPS()" class="text-xs text-emerald-700 font-bold hover:underline flex items-center gap-1">
-                <span>🎯 Use My GPS</span>
+          <!-- Step 2: Where is it? -->
+          <div class="space-y-2">
+            <div class="border-b border-gray-200 pb-1.5 flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-extrabold text-gray-900" id="txtStep2Title">Step 2 — Where is it?</h3>
+                <p class="text-[11px] text-gray-500" id="txtStep2Desc">Tap on the mini-map or drag the pin to mark your exact polder or bund</p>
+              </div>
+              <button type="button" onclick="locateGPS()" class="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1.5 rounded-xl text-xs transition border border-emerald-200">
+                <svg class="w-3.5 h-3.5 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><circle cx="12" cy="12" r="7"/></svg>
+                <span>Use My GPS</span>
               </button>
             </div>
 
-            <p class="text-[11px] text-gray-600 mb-2">
-              Tap anywhere on the mini-map or drag the pin to mark your exact polder / field:
-            </p>
-
-            <!-- Embedded Interactive Leaflet Mini-Map -->
-            <div class="relative w-full mb-2">
+            <!-- Mini Map -->
+            <div class="relative w-full my-2">
               <div id="reportMapPicker"></div>
               <div class="absolute top-2 right-2 z-[400] bg-white/95 backdrop-blur px-2.5 py-1 rounded-lg text-[10px] font-bold text-gray-700 shadow border border-gray-200">
-                👆 Tap to move pin
+                Click map or drag pin to position
               </div>
             </div>
 
-            <!-- Quick Presets -->
-            <div class="flex flex-wrap gap-1.5 mb-2">
-              <button type="button" onclick="setCoords(9.446, 76.458)" class="px-2.5 py-1 bg-gray-100 hover:bg-emerald-100 rounded-lg text-xs font-semibold">🌾 Pulincunnoo</button>
-              <button type="button" onclick="setCoords(9.429, 76.439)" class="px-2.5 py-1 bg-gray-100 hover:bg-emerald-100 rounded-lg text-xs font-semibold">🌾 Moncompu</button>
-              <button type="button" onclick="setCoords(9.436, 76.404)" class="px-2.5 py-1 bg-gray-100 hover:bg-emerald-100 rounded-lg text-xs font-semibold">🌾 Nedumudy</button>
-              <button type="button" onclick="setCoords(9.476, 76.392)" class="px-2.5 py-1 bg-gray-100 hover:bg-emerald-100 rounded-lg text-xs font-semibold">🌊 Kainakary</button>
-              <button type="button" onclick="setCoords(9.420, 76.423)" class="px-2.5 py-1 bg-gray-100 hover:bg-emerald-100 rounded-lg text-xs font-semibold">🧱 Champakulam</button>
+            <!-- Presets -->
+            <div class="flex flex-wrap items-center gap-1.5 pt-1">
+              <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mr-1">Presets:</span>
+              <button type="button" onclick="setCoords(9.446, 76.458)" class="px-2.5 py-1 bg-gray-50 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-bold border border-gray-200">Pulincunnoo</button>
+              <button type="button" onclick="setCoords(9.429, 76.439)" class="px-2.5 py-1 bg-gray-50 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-bold border border-gray-200">Moncompu</button>
+              <button type="button" onclick="setCoords(9.436, 76.404)" class="px-2.5 py-1 bg-gray-50 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-bold border border-gray-200">Nedumudy</button>
+              <button type="button" onclick="setCoords(9.476, 76.392)" class="px-2.5 py-1 bg-gray-50 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-bold border border-gray-200">Kainakary</button>
+              <button type="button" onclick="setCoords(9.420, 76.423)" class="px-2.5 py-1 bg-gray-50 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-bold border border-gray-200">Champakulam</button>
             </div>
 
-            <!-- Coordinate numeric inputs -->
-            <div class="grid grid-cols-2 gap-2 text-xs">
-              <div class="bg-emerald-50/60 p-2 rounded-lg border border-emerald-200">
-                <span class="text-[10px] text-emerald-800 font-bold block mb-0.5">Latitude (അക്ഷാംശം)</span>
-                <input id="inputLat" type="number" step="0.0001" value="9.446" oninput="updatePinFromInputs()" class="w-full bg-white p-1.5 border rounded font-bold text-gray-800" />
+            <!-- Lat/Lng -->
+            <div class="grid grid-cols-2 gap-2 text-xs pt-1">
+              <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+                <span class="text-[10px] text-gray-500 font-bold uppercase block mb-0.5">Latitude</span>
+                <input id="inputLat" type="number" step="0.0001" value="9.446" oninput="updatePinFromInputs()" class="w-full bg-transparent font-extrabold text-gray-900 focus:outline-none" />
               </div>
-              <div class="bg-emerald-50/60 p-2 rounded-lg border border-emerald-200">
-                <span class="text-[10px] text-emerald-800 font-bold block mb-0.5">Longitude (രേഖാംശം)</span>
-                <input id="inputLng" type="number" step="0.0001" value="76.458" oninput="updatePinFromInputs()" class="w-full bg-white p-1.5 border rounded font-bold text-gray-800" />
+              <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+                <span class="text-[10px] text-gray-500 font-bold uppercase block mb-0.5">Longitude</span>
+                <input id="inputLng" type="number" step="0.0001" value="76.458" oninput="updatePinFromInputs()" class="w-full bg-transparent font-extrabold text-gray-900 focus:outline-none" />
               </div>
-            </div>
-            <p class="text-[10px] text-gray-500 mt-1 italic">
-              * System will automatically snap report to nearest Kuttanad canal segment via PostGIS ST_Distance.
-            </p>
-          </div>
-
-          <!-- 4. Photo Evidence -->
-          <div>
-            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">3. Photo Evidence</label>
-            <div class="flex gap-2">
-              <input id="inputPhoto" type="text" placeholder="Paste image URL or click Sample..." class="flex-1 p-2 border rounded-lg text-xs" />
-              <button type="button" onclick="document.getElementById('inputPhoto').value='https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b'" class="px-2.5 py-1.5 bg-gray-100 text-xs font-semibold rounded-lg">Sample</button>
             </div>
           </div>
 
-          <!-- 5. Notes & Sarvam Voice STT Placeholder -->
-          <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">4. Field Notes</label>
-              <button type="button" onclick="triggerVoiceNote()" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
-                🎤 Malayalam Voice Note (Sarvam AI Phase 2)
-              </button>
+          <!-- Step 3: Details, Photo & Notes -->
+          <div class="space-y-3">
+            <div class="border-b border-gray-200 pb-1.5">
+              <h3 class="text-sm font-extrabold text-gray-900" id="txtStep3Title">Step 3 — Details, Photo & Notes</h3>
+              <p class="text-[11px] text-gray-500" id="txtStep3Desc">Provide specifics to help neighbors verify and officials take action</p>
             </div>
-            <textarea id="inputNotes" rows="2" placeholder="കണ്ടത്തിൽ കണ്ട ലക്ഷണങ്ങൾ രേഖപ്പെടുത്തുക..." class="w-full p-2.5 border rounded-xl text-xs font-medium"></textarea>
+
+            <!-- Dynamic Fields -->
+            <div id="dynamicInputs" class="bg-gray-50 p-3.5 rounded-xl border border-gray-200 space-y-3">
+              <!-- Injected dynamically -->
+            </div>
+
+            <!-- Photo Input -->
+            <div>
+              <label class="block text-xs font-bold text-gray-800 mb-1" id="lblPhotoEvidence">Photo Evidence</label>
+              <div class="flex items-center gap-2">
+                <div class="relative flex-1">
+                  <input id="inputPhoto" type="text" placeholder="Paste image URL or click Sample..." class="w-full bg-white border border-gray-300 rounded-xl p-2.5 text-xs font-medium focus:outline-emerald-600 pl-8" />
+                  <svg class="w-4 h-4 text-gray-400 absolute left-2.5 top-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                </div>
+                <button type="button" onclick="document.getElementById('inputPhoto').value='https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b'" class="px-3 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold shrink-0 transition">
+                  Use Sample Photo
+                </button>
+              </div>
+            </div>
+
+            <!-- Field Notes & Sarvam Voice Placeholder -->
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-xs font-bold text-gray-800" id="lblFieldNotes">Field Notes & Observations</label>
+                <button type="button" onclick="triggerVoiceNote()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 hover:bg-amber-200 transition border border-amber-300">
+                  <svg class="w-3.5 h-3.5 text-amber-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+                  <span>Voice Input — Sarvam AI (Next Step)</span>
+                </button>
+              </div>
+              <textarea id="inputNotes" rows="3" placeholder="Describe symptoms, water levels, or immediate assistance needed..." class="w-full bg-white border border-gray-300 rounded-xl p-2.5 text-xs focus:outline-emerald-600 font-medium"></textarea>
+            </div>
           </div>
 
           <!-- Submit Button -->
-          <button type="submit" id="submitBtn" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3.5 rounded-xl text-sm shadow transition">
-            Submit & Generate Instant KAU Action Plan →
+          <button type="submit" id="submitBtn" class="w-full bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white font-extrabold py-3.5 px-4 rounded-xl text-xs sm:text-sm transition shadow-md flex items-center justify-center gap-2 min-h-[44px]">
+            <span id="btnSubmitFormText">Submit Report & Generate Action Plan</span>
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </button>
         </form>
 
-        <!-- Action Card Result Display -->
+        <!-- Instant Action Card Display on Submit -->
         <div id="actionCardResult" class="hidden p-5 border-t border-gray-200">
-          <!-- Dynamically populated on submit -->
+          <!-- Dynamically populated -->
         </div>
       </div>
     </div>
@@ -305,13 +417,21 @@
 
   <!-- VIEW 3: VERIFY QUEUE -->
   <div id="viewVerify" class="hidden flex-1 bg-gradient-to-b from-emerald-50/50 to-gray-50 py-4 sm:py-6 overflow-y-auto">
-    <div class="max-w-3xl mx-auto p-4">
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-4 flex items-center justify-between">
+    <div class="max-w-3xl mx-auto p-4 sm:p-6 pb-20">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 class="text-lg font-black text-gray-900">🛡️ Trust Verification & Peer Review</h2>
-          <p class="text-xs text-gray-600">Neighbors confirm reports to promote them; Krishi Bhavan officers officially verify.</p>
+          <h2 class="text-xl font-extrabold text-gray-900 flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            <span id="verifyHeaderTitle">Trust Verification & Peer Review</span>
+          </h2>
+          <p class="text-xs text-gray-600 mt-1" id="verifyHeaderDesc">
+            Neighboring farmers confirm observations (2+ promotes report); Krishi Officers officially verify.
+          </p>
         </div>
-        <button onclick="loadFeed()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-bold text-gray-700">Refresh</button>
+        <button onclick="loadFeed()" class="flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-bold text-gray-700 transition self-start sm:self-auto border border-gray-200">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+          <span>Refresh</span>
+        </button>
       </div>
 
       <div id="queueList" class="space-y-3">
@@ -320,16 +440,229 @@
     </div>
   </div>
 
+  <!-- VIEW 4: NOTIFICATION INBOX (ALERTS) -->
+  <div id="viewAlerts" class="hidden flex-1 bg-gradient-to-b from-emerald-50/50 to-gray-50 py-4 sm:py-6 overflow-y-auto">
+    <div class="max-w-3xl mx-auto p-4 sm:p-6 pb-20">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          </div>
+          <div>
+            <h1 class="text-xl font-extrabold text-gray-900 leading-tight" id="alertsHeaderTitle">Notification Inbox</h1>
+            <p class="text-xs text-gray-500 mt-0.5">Real-time hydrological alerts, pest outbreak clusters, and peer review updates</p>
+          </div>
+        </div>
+        <button onclick="markAllAlertsRead()" class="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-3 py-2 rounded-xl text-xs transition border border-gray-200">
+          <svg class="w-4 h-4 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Mark all as read</span>
+        </button>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 text-xs font-bold">
+        <button onclick="filterAlerts('all')" id="btnAlertFilterAll" class="px-3 py-2 rounded-xl transition border bg-emerald-700 text-white border-emerald-700 shadow-sm">All Alerts</button>
+        <button onclick="filterAlerts('salinity')" id="btnAlertFilterSalinity" class="px-3 py-2 rounded-xl transition border bg-white text-gray-700 border-gray-200 hover:bg-gray-100">Salinity & Clusters</button>
+        <button onclick="filterAlerts('verification')" id="btnAlertFilterVerification" class="px-3 py-2 rounded-xl transition border bg-white text-gray-700 border-gray-200 hover:bg-gray-100">Verification Updates</button>
+      </div>
+
+      <div id="alertsList" class="space-y-3">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS & DBSCAN MODAL -->
+  <div id="howItWorksModal" class="hidden fixed inset-0 z-[600] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-gray-200 max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-200 mb-4">
+        <h3 class="text-lg font-black text-gray-900 flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <span>How Karshakan Lens Works</span>
+        </h3>
+        <button onclick="closeHowItWorksModal()" class="text-gray-400 hover:text-gray-700 p-1">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="space-y-4 text-xs text-gray-700 leading-relaxed">
+        <div class="bg-emerald-50/60 p-3.5 rounded-xl border border-emerald-100">
+          <h4 class="font-bold text-emerald-900 text-sm mb-1">1. Below-Sea-Level Polder Hydrology</h4>
+          <p>Kuttanad polders lie 1.5 to 2.5 meters below sea level. Salinity travels upstream through backwater canals, not in radial circles. Karshakan Lens models water movements through connected canal segments.</p>
+        </div>
+        <div class="bg-blue-50/60 p-3.5 rounded-xl border border-blue-100">
+          <h4 class="font-bold text-blue-900 text-sm mb-1">2. DBSCAN Spatial Clustering (2.0 km / 7 Days)</h4>
+          <p>Using scikit-learn Haversine DBSCAN, nearby incidents within 2.0 km reported in the past 7 days are automatically clustered. Isolated noise is filtered out, while growing pest outbreaks trigger localized early warnings.</p>
+        </div>
+        <div class="bg-amber-50/60 p-3.5 rounded-xl border border-amber-100">
+          <h4 class="font-bold text-amber-900 text-sm mb-1">3. Community Peer Review & Officer Validation</h4>
+          <p>A report begins as Unconfirmed. Once 2 neighboring farmers confirm the observation, it promotes to Community Confirmed. Krishi Bhavan officers can then grant Official Verification.</p>
+        </div>
+        <div class="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
+          <h4 class="font-bold text-gray-900 text-sm mb-1">4. Zero Chemical Hallucinations</h4>
+          <p>All action steps and spray guidelines are strictly grounded in Kerala Agricultural University (KAU) Package of Practices records. The app never uses an LLM to invent dosages.</p>
+        </div>
+      </div>
+      <div class="pt-4 mt-2">
+        <button onclick="closeHowItWorksModal()" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-2.5 rounded-xl text-xs transition">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEMO LOGIN / PERSONA SWITCHER MODAL -->
+  <div id="demoLoginModal" class="hidden fixed inset-0 z-[600] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-200 mb-4">
+        <h3 class="text-base font-black text-gray-900 flex items-center gap-2">
+          <svg class="w-5 h-5 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          <span>Select Test Persona</span>
+        </h3>
+        <button onclick="closeDemoLoginModal()" class="text-gray-400 hover:text-gray-700 p-1">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="space-y-2 text-xs">
+        <button onclick="selectPersona('22222222-2222-2222-2222-222222222201', 'Thomas Kutty', 'Pulincunnoo Padasekharam', 'farmer')" class="w-full text-left p-3 rounded-xl border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 transition flex items-center justify-between">
+          <div>
+            <div class="font-extrabold text-sm text-gray-900">Thomas Kutty</div>
+            <div class="text-[11px] text-emerald-800">Farmer • Pulincunnoo Padasekharam</div>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 uppercase">Farmer</span>
+        </button>
+
+        <button onclick="selectPersona('22222222-2222-2222-2222-222222222202', 'Radhakrishnan M.', 'Moncompu Thekkekkara', 'farmer')" class="w-full text-left p-3 rounded-xl border border-blue-200 bg-blue-50/50 hover:bg-blue-50 transition flex items-center justify-between">
+          <div>
+            <div class="font-extrabold text-sm text-gray-900">Radhakrishnan M.</div>
+            <div class="text-[11px] text-blue-800">Farmer • Moncompu Thekkekkara</div>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800 uppercase">Farmer</span>
+        </button>
+
+        <button onclick="selectPersona('22222222-2222-2222-2222-222222222204', 'Sreedhar P.', 'Krishi Bhavan Champakulam', 'officer')" class="w-full text-left p-3 rounded-xl border border-purple-200 bg-purple-50/50 hover:bg-purple-50 transition flex items-center justify-between">
+          <div>
+            <div class="font-extrabold text-sm text-gray-900">Sreedhar P.</div>
+            <div class="text-[11px] text-purple-800">Krishi Officer • Champakulam</div>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-800 uppercase">Officer</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    let currentLanguage = 'en';
     let currentReportType = 'crop_disease';
     let currentMap = null;
     let mapLayers = null;
+    let baseLayers = {};
     let globalReports = [];
     let globalCanals = [];
     let globalClusters = [];
+    let globalAlerts = [];
+    let activeAlertFilter = 'all';
     let reportPickerMap = null;
     let pickerMarker = null;
-    let mainMapClickMarker = null;
+    let droppedPinMarker = null;
+    let activeDroppedPin = null;
+
+    let currentUser = {
+      id: '22222222-2222-2222-2222-222222222201',
+      name: 'Thomas Kutty',
+      role: 'farmer',
+      village: 'Pulincunnoo Padasekharam'
+    };
+
+    const dict = {
+      en: {
+        networkName: 'Kuttanad Polder Early-Warning Network',
+        tagline: 'Community-Verified Agro-Hydrology Platform',
+        liveMap: 'Live Map',
+        report: 'Report',
+        verify: 'Verify',
+        alerts: 'Alerts',
+        howItWorks: 'How It Works',
+        reportIssue: 'Report Issue',
+        pinHint: 'Tap or click anywhere on the map to drop a pin and report an issue there',
+        demoBannerTitle: 'Kuttanad Demo Mode: ',
+        demoBannerText: 'Realistic delta canal flows, outbreaks, and community reports are active for demonstration. Tap anywhere on the map to pin a new report.',
+        step1Title: 'Step 1 — What happened?',
+        step1Desc: 'Select the primary issue category affecting your field or channel',
+        step2Title: 'Step 2 — Where is it?',
+        step2Desc: 'Tap on the mini-map or drag the pin to mark your exact polder or bund',
+        step3Title: 'Step 3 — Details, Photo & Notes',
+        step3Desc: 'Provide specifics to help neighbors verify and officials take action',
+        submitBtn: 'Submit Report & Generate Action Plan',
+        reportAtPin: 'Report Issue at This Pin',
+      },
+      ml: {
+        networkName: 'കുട്ടനാട് നെല്ല് - താറാവ് മുൻകരുതൽ നെറ്റ്‌വർക്ക്',
+        tagline: 'കർഷക പരിശോധന അടിസ്ഥാനമാക്കിയുള്ള കാർഷിക മുന്നറിയിപ്പ് പ്ലാറ്റ്ഫോം',
+        liveMap: 'ലൈവ് മാപ്പ്',
+        report: 'വിവരം അറിയിക്കുക',
+        verify: 'പരിശോധന ക്യൂ',
+        alerts: 'മുന്നറിയിപ്പുകൾ',
+        howItWorks: 'പ്രവർത്തന രീതി',
+        reportIssue: 'വിവരം നൽകുക',
+        pinHint: 'മാപ്പിൽ എവിടെയെങ്കിലും തൊട്ട് സ്ഥലം അടയാളപ്പെടുത്തി വിവരം നൽകുക',
+        demoBannerTitle: 'കുട്ടനാട് ഡെമോ സജീവം: ',
+        demoBannerText: 'കുട്ടനാട് തോടുകളിലെ വെള്ളമൊഴുക്കും കർഷക റിപ്പോർട്ടുകളും ഡെമോക്കായി ക്രമീകരിച്ചിരിക്കുന്നു. മാപ്പിൽ തൊട്ട് പുതിയ റിപ്പോർട്ട് നൽകാം.',
+        step1Title: 'ഘട്ടം 1 — എന്താണ് സംഭവിച്ചത്?',
+        step1Desc: 'ബാധിച്ച പ്രധാന പ്രശ്നം തിരഞ്ഞെടുക്കുക',
+        step2Title: 'ഘട്ടം 2 — എവിടെയാണ്?',
+        step2Desc: 'മിനി-മാപ്പിൽ തൊട്ട് കൃത്യമായ പാടശേഖരം അല്ലെങ്കിൽ ബണ്ട് അടയാളപ്പെടുത്തുക',
+        step3Title: 'ഘട്ടം 3 — വിശദാംശങ്ങൾ, ചിത്രം, കുറിപ്പ്',
+        step3Desc: 'അയൽക്കാർക്ക് സ്ഥിരീകരിക്കാനും ഉദ്യോഗസ്ഥർക്ക് നടപടിയെടുക്കാനും വിശദാംശങ്ങൾ നൽകുക',
+        submitBtn: 'റിപ്പോർട്ട് നൽകി നിർദ്ദേശങ്ങൾ കാണുക',
+        reportAtPin: 'ഈ സ്ഥലത്തെക്കുറിച്ച് വിവരം നൽകുക',
+      }
+    };
+
+    function toggleLang() {
+      currentLanguage = currentLanguage === 'en' ? 'ml' : 'en';
+      document.getElementById('btnLangText').innerText = currentLanguage === 'en' ? 'ML' : 'EN';
+      const t = dict[currentLanguage];
+
+      document.getElementById('txtNetworkName').innerText = t.networkName;
+      document.getElementById('txtTagline').innerText = t.tagline;
+      document.getElementById('navLiveMapLabel').innerText = t.liveMap;
+      document.getElementById('navReportLabel').innerText = t.report;
+      document.getElementById('navVerifyLabel').innerText = t.verify;
+      document.getElementById('navAlertsLabel').innerText = t.alerts;
+      document.getElementById('navHowItWorksLabel').innerText = t.howItWorks;
+      document.getElementById('btnReportIncidentLabel').innerText = t.reportIssue;
+      document.getElementById('mapPinHint').innerText = t.pinHint;
+      document.getElementById('seedBannerTitle').innerText = t.demoBannerTitle;
+      document.getElementById('seedBannerText').innerText = t.demoBannerText;
+      document.getElementById('txtStep1Title').innerText = t.step1Title;
+      document.getElementById('txtStep1Desc').innerText = t.step1Desc;
+      document.getElementById('txtStep2Title').innerText = t.step2Title;
+      document.getElementById('txtStep2Desc').innerText = t.step2Desc;
+      document.getElementById('txtStep3Title').innerText = t.step3Title;
+      document.getElementById('txtStep3Desc').innerText = t.step3Desc;
+      document.getElementById('btnSubmitFormText').innerText = t.submitBtn;
+      document.getElementById('btnReportAtPin').innerText = t.reportAtPin;
+    }
+
+    function openHowItWorksModal() {
+      document.getElementById('howItWorksModal').classList.remove('hidden');
+    }
+    function closeHowItWorksModal() {
+      document.getElementById('howItWorksModal').classList.add('hidden');
+    }
+    function openDemoLoginModal() {
+      document.getElementById('demoLoginModal').classList.remove('hidden');
+    }
+    function closeDemoLoginModal() {
+      document.getElementById('demoLoginModal').classList.add('hidden');
+    }
+
+    function selectPersona(id, name, village, role) {
+      currentUser = { id, name, role, village };
+      document.getElementById('currentUserNameLabel').innerText = name.split(' ')[0];
+      closeDemoLoginModal();
+      renderQueue();
+    }
 
     function initLeafletMap() {
       if (currentMap) return;
@@ -343,74 +676,153 @@
       });
       L.control.zoom({ position: 'bottomright' }).addTo(currentMap);
 
-      // OpenStreetMap Humanitarian (HOT) Layer (100% Free, Zero API Key Required)
+      // OpenStreetMap Humanitarian (HOT)
       const hotLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
         maxZoom: 19,
         subdomains: ['a', 'b', 'c'],
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | HOT'
+        attribution: '&copy; OpenStreetMap contributors | HOT'
       });
 
-      // Esri World Street Map Layer (100% Free, Zero API Key Required)
+      // Topo Street
       const streetLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 18,
         attribution: '&copy; Esri World Street Map'
       });
 
-      // Esri Satellite Imagery Layer (100% Free, Zero API Key Required)
+      // Satellite Imagery
       const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 18,
         attribution: '&copy; Esri World Imagery'
       });
 
+      baseLayers = {
+        "Waterways (OSM HOT)": hotLayer,
+        "Topo Street": streetLayer,
+        "Satellite Imagery": satLayer
+      };
+
       hotLayer.addTo(currentMap);
-      L.control.layers({
-        "🌾 Kuttanad Waterways (OSM HOT)": hotLayer,
-        "🗺️ Topo Street": streetLayer,
-        "🛰️ Satellite Imagery": satLayer
-      }, null, { position: 'topright' }).addTo(currentMap);
+      L.control.layers(baseLayers, null, { position: 'topright' }).addTo(currentMap);
 
       mapLayers = L.layerGroup().addTo(currentMap);
 
-      // Click on main map to pin-point report
+      // Map click handler to drop pin
       currentMap.on('click', function(e) {
         const lat = parseFloat(e.latlng.lat.toFixed(4));
         const lng = parseFloat(e.latlng.lng.toFixed(4));
-        
-        if (mainMapClickMarker) {
-          currentMap.removeLayer(mainMapClickMarker);
-        }
-
-        const iconHtml = `<div style="background:#dc2626;color:white;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 12px rgba(220,38,38,0.9);border:2px solid white;">📍</div>`;
-        mainMapClickMarker = L.marker([lat, lng], {
-          icon: L.divIcon({
-            className: 'custom-pin pulse-danger',
-            html: iconHtml,
-            iconSize: [34, 34],
-            iconAnchor: [17, 34]
-          })
-        }).addTo(currentMap);
-
-        mainMapClickMarker.bindPopup(`
-          <div style="min-width: 190px; text-align: center; padding: 4px; font-family: system-ui, sans-serif;">
-            <div style="font-weight: 800; font-size: 13px; color: #111827; margin-bottom: 2px;">📍 Pinned Farm Location</div>
-            <div style="font-size: 11px; font-weight: 700; color: #047857; background: #ecfdf5; border-radius: 6px; padding: 2px 6px; display: inline-block; margin-bottom: 8px;">
-              Lat: ${lat}, Lng: ${lng}
-            </div>
-            <button onclick="reportAtLocation(${lat}, ${lng})" style="width: 100%; background: #15803d; color: white; border: none; font-weight: 800; font-size: 12px; padding: 8px 12px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-              📢 Report Incident Here →
-            </button>
-          </div>
-        `).openPopup();
+        setMapDroppedPin(lat, lng);
       });
 
-      // Invalidate size after layout completes
       setTimeout(() => { if (currentMap) currentMap.invalidateSize(); }, 200);
       setTimeout(() => { if (currentMap) currentMap.invalidateSize(); }, 600);
     }
 
-    function reportAtLocation(lat, lng) {
-      setCoords(lat, lng);
+    function setMapDroppedPin(lat, lng) {
+      activeDroppedPin = { lat, lng };
+      if (droppedPinMarker) {
+        currentMap.removeLayer(droppedPinMarker);
+      }
+
+      const iconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`;
+      const iconHtml = `<div style="background:#15803d;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 6px rgba(21,128,61,0.35), 0 4px 10px rgba(0,0,0,0.3);border:3px solid white;cursor:pointer;">${iconSvg}</div>`;
+
+      droppedPinMarker = L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: '',
+          html: iconHtml,
+          iconSize: [38, 38],
+          iconAnchor: [19, 19]
+        }),
+        draggable: true
+      }).addTo(currentMap);
+
+      droppedPinMarker.on('dragend', function(e) {
+        const pos = e.target.getLatLng();
+        setMapDroppedPin(parseFloat(pos.lat.toFixed(4)), parseFloat(pos.lng.toFixed(4)));
+      });
+
+      document.getElementById('droppedPinCoords').innerText = `Lat: ${lat} | Lng: ${lng}`;
+      document.getElementById('droppedPinCard').classList.remove('hidden');
+    }
+
+    function clearDroppedPin() {
+      if (droppedPinMarker && currentMap) {
+        currentMap.removeLayer(droppedPinMarker);
+        droppedPinMarker = null;
+      }
+      activeDroppedPin = null;
+      document.getElementById('droppedPinCard').classList.add('hidden');
+    }
+
+    function reportAtDroppedPin() {
+      if (activeDroppedPin) {
+        setCoords(activeDroppedPin.lat, activeDroppedPin.lng);
+      }
       switchView('report');
+    }
+
+    function toggleLocalTrendPanel() {
+      const panel = document.getElementById('localTrendPanel');
+      if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
+        const lat = activeDroppedPin ? activeDroppedPin.lat : 9.446;
+        const lng = activeDroppedPin ? activeDroppedPin.lng : 76.458;
+        loadLocalTrend(lat, lng);
+      } else {
+        panel.classList.add('hidden');
+      }
+    }
+
+    async function loadLocalTrend(lat, lng) {
+      document.getElementById('trendLandmarkLabel').innerText = `Lat: ${lat}, Lng: ${lng}`;
+      const container = document.getElementById('trendContent');
+      container.innerHTML = '<div class="py-4 text-center text-gray-500 font-semibold">Evaluating localized trends...</div>';
+
+      try {
+        const res = await fetch(`/api/trends/local?lat=${lat}&lng=${lng}&radius_km=3.0`);
+        const d = await res.json();
+        document.getElementById('trendLandmarkLabel').innerText = d.nearest_landmark || `${lat}, ${lng}`;
+
+        container.innerHTML = `
+          <div class="grid grid-cols-2 gap-2.5">
+            <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+              <span class="text-[10px] text-gray-500 block uppercase font-bold tracking-wider">Nearby Reports (7d)</span>
+              <div class="flex items-baseline gap-2 mt-0.5">
+                <span class="text-lg font-black text-gray-900">${d.nearby_reports_count_7d}</span>
+                <span class="text-[11px] text-gray-500">(prev: ${d.prior_7d_reports_count})</span>
+              </div>
+              <div class="mt-1">
+                <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${d.trend_direction === 'Growing' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}">${d.trend_direction} Trend</span>
+              </div>
+            </div>
+            <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+              <span class="text-[10px] text-gray-500 block uppercase font-bold tracking-wider">Nearest Canal</span>
+              <div class="font-extrabold text-gray-900 text-xs truncate mt-0.5">${d.nearest_canal_name || 'Kuttanad Canal'}</div>
+              <div class="mt-1 text-[11px] font-bold text-gray-800">${d.nearest_canal_salinity_ppt !== undefined ? d.nearest_canal_salinity_ppt + ' ppt' : 'Fresh'}</div>
+            </div>
+          </div>
+          <div class="p-2.5 rounded-xl border ${d.active_outbreak_nearby ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-emerald-50 border-emerald-200 text-emerald-900'}">
+            <span class="font-bold text-xs block">${d.active_outbreak_nearby ? 'Active Pest / Mortality Cluster Nearby' : 'No Active Outbreak Clusters Within 2.0 km'}</span>
+            ${d.nearest_cluster_name ? `<span class="text-[10px] block opacity-85">${d.nearest_cluster_name}</span>` : ''}
+          </div>
+          <div class="bg-emerald-50/70 border border-emerald-200/80 rounded-xl p-3">
+            <div class="text-emerald-900 font-extrabold text-[11px] mb-1 uppercase tracking-wider">Recommended Immediate Action</div>
+            <p class="text-gray-800 text-xs font-medium leading-relaxed">${d.recommended_action}</p>
+          </div>
+        `;
+      } catch (err) {
+        container.innerHTML = '<div class="py-4 text-center text-red-600 font-semibold">Unable to load trend data</div>';
+      }
+    }
+
+    function locateGPSForTrend() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          loadLocalTrend(parseFloat(pos.coords.latitude.toFixed(4)), parseFloat(pos.coords.longitude.toFixed(4)));
+        }, () => loadLocalTrend(9.446, 76.458));
+      } else {
+        loadLocalTrend(9.446, 76.458);
+      }
     }
 
     function initReportPickerMap() {
@@ -433,24 +845,26 @@
           attribution: '&copy; OpenStreetMap'
         }).addTo(reportPickerMap);
 
-        const markerHtml = `<div style="background:#15803d;color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 3px 8px rgba(0,0,0,0.4);border:2px solid white;">📍</div>`;
+        const iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`;
+        const markerHtml = `<div style="background:#15803d;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,0.4);border:2px solid white;cursor:grab;">${iconSvg}</div>`;
+
         pickerMarker = L.marker([lat, lng], {
           draggable: true,
           icon: L.divIcon({
-            className: 'custom-pin',
+            className: '',
             html: markerHtml,
-            iconSize: [32, 32],
-            iconAnchor: [16, 32]
+            iconSize: [34, 34],
+            iconAnchor: [17, 34]
           })
         }).addTo(reportPickerMap);
 
         pickerMarker.on('dragend', function(e) {
           const pos = e.target.getLatLng();
-          setCoords(pos.lat.toFixed(4), pos.lng.toFixed(4), false);
+          setCoords(parseFloat(pos.lat.toFixed(4)), parseFloat(pos.lng.toFixed(4)), false);
         });
 
         reportPickerMap.on('click', function(e) {
-          setCoords(e.latlng.lat.toFixed(4), e.latlng.lng.toFixed(4));
+          setCoords(parseFloat(e.latlng.lat.toFixed(4)), parseFloat(e.latlng.lng.toFixed(4)));
         });
       } else {
         pickerMarker.setLatLng([lat, lng]);
@@ -484,7 +898,7 @@
     function locateGPS() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(pos => {
-          setCoords(pos.coords.latitude.toFixed(4), pos.coords.longitude.toFixed(4));
+          setCoords(parseFloat(pos.coords.latitude.toFixed(4)), parseFloat(pos.coords.longitude.toFixed(4)));
         }, () => setCoords(9.446, 76.458));
       } else {
         setCoords(9.446, 76.458);
@@ -495,23 +909,33 @@
       document.getElementById('viewMap').classList.add('hidden');
       document.getElementById('viewReport').classList.add('hidden');
       document.getElementById('viewVerify').classList.add('hidden');
-      document.getElementById('navMap').className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-gray-600 hover:bg-emerald-50';
-      document.getElementById('navReport').className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-gray-600 hover:bg-emerald-50';
-      document.getElementById('navVerify').className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-gray-600 hover:bg-emerald-50';
+      document.getElementById('viewAlerts').classList.add('hidden');
+
+      const inactiveNav = 'px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold text-gray-700 hover:text-emerald-800 hover:bg-gray-100 flex items-center gap-1.5 transition';
+      const activeNav = 'px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-700 text-white shadow-sm flex items-center gap-1.5 transition';
+
+      document.getElementById('navMap').className = inactiveNav;
+      document.getElementById('navReport').className = inactiveNav;
+      document.getElementById('navVerify').className = inactiveNav;
+      document.getElementById('navAlerts').className = inactiveNav + ' relative';
 
       if (view === 'map') {
         document.getElementById('viewMap').classList.remove('hidden');
-        document.getElementById('navMap').className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white shadow-sm';
+        document.getElementById('navMap').className = activeNav;
         setTimeout(() => { if (currentMap) currentMap.invalidateSize(); }, 150);
         setTimeout(() => { if (currentMap) currentMap.invalidateSize(); }, 500);
       } else if (view === 'report') {
         document.getElementById('viewReport').classList.remove('hidden');
-        document.getElementById('navReport').className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white shadow-sm';
+        document.getElementById('navReport').className = activeNav;
         setTimeout(() => { initReportPickerMap(); }, 100);
       } else if (view === 'verify') {
         document.getElementById('viewVerify').classList.remove('hidden');
-        document.getElementById('navVerify').className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white shadow-sm';
+        document.getElementById('navVerify').className = activeNav;
         renderQueue();
+      } else if (view === 'alerts') {
+        document.getElementById('viewAlerts').classList.remove('hidden');
+        document.getElementById('navAlerts').className = activeNav + ' relative';
+        loadAlerts();
       }
     }
 
@@ -520,9 +944,9 @@
       ['crop_disease', 'salinity', 'bird_deaths', 'bund_seepage', 'crop_loss'].forEach(type => {
         const btn = document.getElementById('btn_' + type);
         if (type === t) {
-          btn.className = 'type-btn p-3 rounded-xl border text-left bg-emerald-700 text-white border-emerald-700 shadow-md';
+          btn.className = 'type-btn p-3 rounded-xl border text-left bg-emerald-700 text-white border-emerald-700 shadow-md min-h-[72px]';
         } else {
-          btn.className = 'type-btn p-3 rounded-xl border text-left bg-gray-50 text-gray-700 border-gray-200';
+          btn.className = 'type-btn p-3 rounded-xl border text-left bg-gray-50/50 text-gray-800 border-gray-200 hover:bg-gray-50 min-h-[72px]';
         }
       });
       renderDynamicInputs();
@@ -532,53 +956,67 @@
       const container = document.getElementById('dynamicInputs');
       if (currentReportType === 'crop_disease') {
         container.innerHTML = `
-          <label class="block text-xs font-bold text-gray-700 mb-1">Paddy Disease Symptoms</label>
-          <select id="subDisease" class="w-full bg-white border rounded-lg p-2 text-xs font-semibold">
-            <option value="brown_planthopper">Brown Plant Hopper (BPH - തവിട്ടു ചാഴി)</option>
-            <option value="sheath_blight">Sheath Blight (പോളരോഗം)</option>
-            <option value="bacterial_leaf_blight">Bacterial Leaf Blight (ഇലകരിച്ചിൽ)</option>
-            <option value="rice_blast">Rice Blast (കുലവാട്ടം)</option>
+          <label class="block text-xs font-bold text-gray-800 mb-1">Paddy Disease Symptoms</label>
+          <select id="subDisease" class="w-full bg-white border border-gray-300 rounded-lg p-2.5 text-xs font-semibold">
+            <option value="brown_planthopper">Brown Plant Hopper (BPH)</option>
+            <option value="sheath_blight">Sheath Blight</option>
+            <option value="bacterial_leaf_blight">Bacterial Leaf Blight</option>
+            <option value="rice_blast">Rice Blast</option>
           </select>
         `;
       } else if (currentReportType === 'salinity') {
         container.innerHTML = `
           <div class="flex justify-between items-center mb-1">
-            <label class="text-xs font-bold text-gray-700">Canal Salinity Reading (ppt)</label>
-            <span id="salVal" class="text-xs font-extrabold px-2 py-0.5 rounded bg-red-100 text-red-800">2.5 ppt (Critical)</span>
+            <label class="text-xs font-bold text-gray-800">Canal Salinity Reading (ppt)</label>
+            <span id="salVal" class="text-xs font-extrabold px-2 py-0.5 rounded bg-red-100 text-red-800">2.5 ppt (Danger)</span>
           </div>
           <input id="subSalinity" type="range" min="0.5" max="6.0" step="0.1" value="2.5" oninput="document.getElementById('salVal').innerText = this.value + ' ppt ' + (this.value >= 2.0 ? '(Danger)' : '(Watch)')" class="w-full accent-blue-600" />
+          <div class="flex justify-between text-[10px] text-gray-500 mt-0.5">
+            <span>0.5 ppt (Fresh)</span>
+            <span class="font-bold text-red-600">2.0 ppt (Critical Threshold)</span>
+            <span>6.0 ppt (High Ingress)</span>
+          </div>
         `;
       } else if (currentReportType === 'bird_deaths') {
         container.innerHTML = `
-          <div class="grid grid-cols-2 gap-2">
+          <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="text-xs font-bold text-rose-800">Dead Ducks</label>
-              <input id="subDead" type="number" value="18" min="1" class="w-full p-2 border rounded-lg text-xs font-bold" />
+              <label class="block text-xs font-bold text-rose-800 mb-1">Dead Ducks</label>
+              <input id="subDead" type="number" value="18" min="1" class="w-full bg-white border border-rose-300 rounded-lg p-2 text-xs font-bold focus:outline-rose-600" />
             </div>
             <div>
-              <label class="text-xs font-bold text-amber-800">Sick Ducks</label>
-              <input id="subSick" type="number" value="30" min="0" class="w-full p-2 border rounded-lg text-xs font-bold" />
+              <label class="block text-xs font-bold text-amber-800 mb-1">Sick Ducks</label>
+              <input id="subSick" type="number" value="30" min="0" class="w-full bg-white border border-amber-300 rounded-lg p-2 text-xs font-bold focus:outline-amber-600" />
             </div>
           </div>
         `;
       } else if (currentReportType === 'bund_seepage') {
         container.innerHTML = `
-          <label class="text-xs font-bold text-amber-800 mb-1 block">Seepage Type</label>
-          <select id="subSeepage" class="w-full p-2 border rounded-lg text-xs font-semibold">
-            <option value="active_piping">Active Boiling Piping (മണൽച്ചാക്ക് അടിയന്തര ആവശ്യം)</option>
-            <option value="surface_sweat">Outer Bund Surface Wetting</option>
-          </select>
+          <div class="space-y-2">
+            <div>
+              <label class="block text-xs font-bold text-gray-800 mb-1">Seepage Condition</label>
+              <select id="subSeepage" class="w-full bg-white border border-gray-300 rounded-lg p-2 text-xs font-semibold">
+                <option value="active_piping">Active Boiling Piping (Sandbag Emergency)</option>
+                <option value="surface_sweat">Outer Bund Surface Wetting</option>
+                <option value="settlement_crack">Tension Crack on Bund Crest</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-800 mb-1">Waterhead Difference: 3.5 Feet</label>
+              <input id="subHead" type="range" min="1.0" max="6.0" step="0.5" value="3.5" class="w-full accent-amber-600" />
+            </div>
+          </div>
         `;
       } else {
         container.innerHTML = `
-          <label class="text-xs font-bold text-gray-700 mb-1 block">Affected Area (Acres)</label>
-          <input id="subAcres" type="number" value="2.5" step="0.5" class="w-full p-2 border rounded-lg text-xs font-bold" />
+          <label class="block text-xs font-bold text-gray-800 mb-1">Affected Area (Acres)</label>
+          <input id="subAcres" type="number" value="2.5" step="0.5" class="w-full bg-white border border-gray-300 rounded-lg p-2 text-xs font-bold" />
         `;
       }
     }
 
     function triggerVoiceNote() {
-      document.getElementById('inputNotes').value = 'കതിരുകൾക്ക് താഴെ തവിട്ടു ചാഴി കൂട്ടത്തോടെ കാണുന്നു. ഇലകൾ മഞ്ഞളിക്കുന്നുണ്ട്.';
+      document.getElementById('inputNotes').value = 'Brown plant hoppers clustered at the stem base of 50-day Uma paddy. Browning circular hopper burn patches visible near the canal inlet.';
     }
 
     async function loadFeed() {
@@ -589,7 +1027,6 @@
         globalCanals = data.affected_canals;
         globalClusters = data.active_clusters;
 
-        // Update stats
         document.getElementById('statReportsCount').innerText = globalReports.length;
         const dangerCanals = globalCanals.filter(c => c.current_alert_level === 'Danger').length;
         document.getElementById('statSalinityAlerts').innerText = dangerCanals > 0 ? dangerCanals + ' Danger' : globalCanals.length + ' Segments';
@@ -600,7 +1037,7 @@
 
         renderMapLayers();
         renderQueue();
-        setTimeout(() => { if (currentMap) currentMap.invalidateSize(); }, 200);
+        loadAlerts();
       } catch (e) {
         console.error('Failed to load map feed', e);
       }
@@ -615,11 +1052,13 @@
         const coords = c.coordinates.map(([lng, lat]) => [lat, lng]);
         let color = '#0284c7';
         let weight = 4;
+        let dashArray = undefined;
         if (c.current_alert_level === 'Danger') { color = '#dc2626'; weight = 6; }
         else if (c.current_alert_level === 'Warning') { color = '#f97316'; weight = 5; }
+        else if (c.current_alert_level === 'Watch') { color = '#eab308'; dashArray = '6, 6'; }
 
-        const poly = L.polyline(coords, { color, weight, opacity: 0.85 }).addTo(mapLayers);
-        poly.bindPopup(`<b>🌊 ${c.name}</b><br>Salinity: ${c.salinity_ppt ? c.salinity_ppt + ' ppt' : 'Normal'}<br>${c.alert_reason || ''}`);
+        const poly = L.polyline(coords, { color, weight, dashArray, opacity: 0.85 }).addTo(mapLayers);
+        poly.bindPopup(`<b>${c.name}</b><br>Salinity: ${c.salinity_ppt ? c.salinity_ppt + ' ppt' : 'Normal'}<br>${c.alert_reason || ''}`);
       });
 
       // Clusters
@@ -630,36 +1069,50 @@
           fillOpacity: 0.22,
           radius: (cl.radius_km || 2.0) * 1000
         }).addTo(mapLayers);
-        circle.bindPopup(`<b>⚠️ ${cl.alert_level} Outbreak Cluster</b><br>${cl.report_count} reports within ${cl.radius_km} km`);
+        circle.bindPopup(`<b>${cl.alert_level} Outbreak Cluster</b><br>${cl.report_count} reports within ${cl.radius_km} km`);
       });
 
-      // Report Pins
+      // Report Pins with Crisp SVG
       globalReports.forEach(r => {
         let pinBg = '#f59e0b';
         if (r.verification_status === 'community_confirmed') pinBg = '#2563eb';
         if (r.verification_status === 'officially_verified') pinBg = '#16a34a';
 
-        let symbol = '⚠️';
-        if (r.report_type === 'crop_disease') symbol = '🌾';
-        if (r.report_type === 'salinity') symbol = '🌊';
-        if (r.report_type === 'bird_deaths') symbol = '🦆';
-        if (r.report_type === 'bund_seepage') symbol = '🧱';
+        let svgIcon = '';
+        if (r.report_type === 'crop_disease') {
+          svgIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>`;
+        } else if (r.report_type === 'salinity') {
+          svgIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>`;
+        } else if (r.report_type === 'bird_deaths') {
+          svgIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+        } else if (r.report_type === 'bund_seepage') {
+          svgIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+        } else {
+          svgIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`;
+        }
 
         const icon = L.divIcon({
           className: '',
-          html: `<div style="width:34px;height:34px;border-radius:50%;background:${pinBg};display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 4px 6px rgba(0,0,0,0.3);font-size:16px;">${symbol}</div>`,
-          iconSize: [34, 34],
-          iconAnchor: [17, 17]
+          html: `<div style="width:32px;height:32px;border-radius:50%;background:${pinBg};display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 4px 6px rgba(0,0,0,0.3);">${svgIcon}</div>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16]
         });
 
         const marker = L.marker([r.latitude, r.longitude], { icon }).addTo(mapLayers);
-        marker.bindPopup(`<b>${r.report_type.replace('_', ' ').toUpperCase()}</b><br>Status: <b>${r.verification_status}</b><br>Confirmations: ${r.confirmations_count}<br>${r.notes_text ? '<i>"' + r.notes_text + '"</i>' : ''}`);
+        marker.bindPopup(`
+          <div style="font-family: sans-serif; min-width: 190px;">
+            <div style="font-weight: bold; font-size: 13px; text-transform: capitalize; color: #0f172a;">${r.report_type.replace('_', ' ')}</div>
+            <div style="font-size: 11px; color: #475569; margin-top: 2px;">Status: <b>${r.verification_status}</b></div>
+            <div style="font-size: 11px; color: #475569;">Confirmations: <b>${r.confirmations_count}</b></div>
+            ${r.notes_text ? `<div style="font-size: 11px; color: #64748b; font-style: italic; margin-top: 4px;">"${r.notes_text}"</div>` : ''}
+          </div>
+        `);
       });
     }
 
     async function handleFormSubmit(e) {
       e.preventDefault();
-      const reporterId = document.getElementById('userSelector').value;
+      const reporterId = currentUser.id;
       const lat = parseFloat(document.getElementById('inputLat').value);
       const lng = parseFloat(document.getElementById('inputLng').value);
       const photoUrl = document.getElementById('inputPhoto').value;
@@ -668,7 +1121,7 @@
       let details = {};
       if (currentReportType === 'crop_disease') {
         details.disease_code = document.getElementById('subDisease').value;
-        details.confidence = photoUrl.includes('uncertain') ? 0.52 : 0.94;
+        details.confidence = photoUrl.includes('uncertain') ? 0.55 : 0.94;
       } else if (currentReportType === 'salinity') {
         details.salinity_ppt = parseFloat(document.getElementById('subSalinity').value);
       } else if (currentReportType === 'bird_deaths') {
@@ -680,7 +1133,9 @@
         details.affected_area_acres = parseFloat(document.getElementById('subAcres').value);
       }
 
-      document.getElementById('submitBtn').innerText = 'Submitting & Routing...';
+      document.getElementById('submitBtn').disabled = true;
+      document.getElementById('btnSubmitFormText').innerText = 'Submitting & Checking Hydrology...';
+
       try {
         const res = await fetch('/api/reports', {
           method: 'POST',
@@ -696,28 +1151,34 @@
           })
         });
         const rep = await res.json();
-        document.getElementById('submitBtn').innerText = 'Submit & Generate Instant KAU Action Plan →';
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('btnSubmitFormText').innerText = 'Submit Report & Generate Action Plan';
 
-        // Render Action Card
         if (rep.action_guidance) {
           const g = rep.action_guidance;
           const cardHtml = `
-            <div class="rounded-2xl overflow-hidden border border-emerald-200 shadow-xl">
-              <div class="p-4 ${g.alert_level === 'Danger' ? 'bg-red-700' : 'bg-emerald-700'} text-white">
-                <span class="text-xs font-black uppercase px-2 py-0.5 rounded bg-white/20">${g.alert_level} Protocol</span>
-                <h3 class="text-lg font-black mt-1">${g.title}</h3>
-                <p class="text-xs text-white/90 font-medium">${g.title_ml}</p>
+            <div class="rounded-2xl overflow-hidden border border-emerald-300 shadow-xl bg-white">
+              <div class="p-5 ${g.alert_level === 'Danger' ? 'bg-rose-700' : 'bg-emerald-700'} text-white">
+                <span class="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-white/20">${g.alert_level} Protocol</span>
+                <h3 class="text-xl font-extrabold mt-1 leading-snug">${g.title}</h3>
+                <p class="text-xs text-white/90 font-medium mt-0.5">${g.title_ml}</p>
               </div>
-              <div class="p-4 bg-white space-y-3 text-xs">
-                <p class="p-2.5 bg-gray-50 rounded-lg text-gray-800 font-medium">${g.summary}</p>
+              <div class="p-5 space-y-4 text-xs">
+                <p class="p-3 bg-gray-50 rounded-xl text-gray-800 font-medium leading-relaxed">${g.summary}</p>
                 <div>
-                  <h4 class="font-bold text-gray-900 uppercase text-[11px] mb-1.5">Action Steps:</h4>
-                  <ul class="space-y-1.5 text-gray-700">
-                    ${g.bullet_points.map((pt, i) => `<li class="flex gap-2"><b>${i+1}.</b><span>${pt}</span></li>`).join('')}
+                  <h4 class="font-extrabold text-gray-900 uppercase text-[11px] mb-2 flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span>Immediate Action Steps:</span>
+                  </h4>
+                  <ul class="space-y-2 text-gray-700">
+                    ${g.bullet_points.map((pt, i) => `<li class="flex items-start gap-2.5 bg-emerald-50/50 p-2.5 rounded-xl border border-emerald-100"><span class="w-5 h-5 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-[11px] shrink-0">${i+1}</span><span>${pt}</span></li>`).join('')}
                   </ul>
                 </div>
-                ${g.citation ? `<p class="text-[10px] text-gray-500 bg-gray-50 p-2 rounded"><b>Citation:</b> ${g.citation}</p>` : ''}
-                <button onclick="switchView('map')" class="w-full bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-center">View On Live Map →</button>
+                ${g.citation ? `<p class="text-[11px] text-gray-500 bg-gray-50 p-2.5 rounded-xl border border-gray-200"><b>Citation:</b> ${g.citation}</p>` : ''}
+                <div class="flex items-center gap-2 pt-2">
+                  <button onclick="switchView('map')" class="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3 px-4 rounded-xl text-xs shadow transition text-center">View On Live Map →</button>
+                  <button onclick="document.getElementById('actionCardResult').classList.add('hidden')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-xl text-xs transition">Dismiss</button>
+                </div>
               </div>
             </div>
           `;
@@ -729,33 +1190,37 @@
         loadFeed();
       } catch (err) {
         alert('Submission failed: ' + err.message);
-        document.getElementById('submitBtn').innerText = 'Submit & Generate Instant KAU Action Plan →';
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('btnSubmitFormText').innerText = 'Submit Report & Generate Action Plan';
       }
     }
 
     function renderQueue() {
       const container = document.getElementById('queueList');
       if (!container) return;
-      const currentUserRole = document.getElementById('userSelector').value === '22222222-2222-2222-2222-222222222204' ? 'officer' : 'farmer';
+      const isOfficer = currentUser.role === 'officer';
 
       container.innerHTML = globalReports.map(r => {
         return `
           <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
             <div>
               <div class="flex items-center gap-2 mb-1">
-                <span class="font-bold text-sm capitalize">${r.report_type.replace('_', ' ')}</span>
-                <span class="px-2 py-0.5 rounded-full font-bold text-[10px] ${r.verification_status === 'officially_verified' ? 'bg-emerald-100 text-emerald-800' : (r.verification_status === 'community_confirmed' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800')}">${r.verification_status}</span>
+                <span class="font-extrabold text-sm text-gray-900 capitalize">${r.report_type.replace('_', ' ')}</span>
+                <span class="px-2.5 py-0.5 rounded-full font-black text-[10px] uppercase tracking-wider ${r.verification_status === 'officially_verified' ? 'bg-emerald-100 text-emerald-800' : (r.verification_status === 'community_confirmed' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800')}">${r.verification_status}</span>
               </div>
-              <div class="text-gray-500 text-[11px]">Canal: <b>${r.canal_name || 'Nearest Canal'}</b> | Confirmations: <b>${r.confirmations_count}</b></div>
+              <div class="text-gray-500 text-[11px]">Canal: <b>${r.canal_name || 'Nearest Canal'}</b> | Neighbor Confirmations: <b>${r.confirmations_count}</b></div>
               ${r.notes_text ? `<div class="italic text-gray-700 mt-1">"${r.notes_text}"</div>` : ''}
             </div>
-            <div class="flex items-center gap-2">
-              ${currentUserRole === 'farmer' && r.verification_status !== 'officially_verified' ? `
-                <button onclick="doConfirm('${r.id}')" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs">Confirm Report</button>
+            <div class="flex items-center gap-2 shrink-0">
+              ${!isOfficer && r.verification_status !== 'officially_verified' ? `
+                <button onclick="doConfirm('${r.id}')" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs transition flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  <span>Confirm Report</span>
+                </button>
               ` : ''}
-              ${currentUserRole === 'officer' ? `
-                <button onclick="doVerify('${r.id}', 'officially_verified')" class="px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-xl text-xs">Officially Verify</button>
-                <button onclick="doVerify('${r.id}', 'rejected')" class="px-2.5 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl text-xs">Reject</button>
+              ${isOfficer ? `
+                <button onclick="doVerify('${r.id}', 'officially_verified')" class="px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-xl text-xs transition">Officially Verify</button>
+                <button onclick="doVerify('${r.id}', 'rejected')" class="px-2.5 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl text-xs transition">Reject</button>
               ` : ''}
             </div>
           </div>
@@ -764,18 +1229,16 @@
     }
 
     async function doConfirm(reportId) {
-      const confirmerId = document.getElementById('userSelector').value;
       try {
         const res = await fetch('/api/reports/' + reportId + '/confirm', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ confirmer_id: confirmerId })
+          body: JSON.stringify({ confirmer_id: currentUser.id })
         });
         if (!res.ok) {
           const err = await res.json();
           alert('Notice: ' + err.detail);
         } else {
-          alert('Report confirmed! At 2 confirmations, it promotes to Community Confirmed.');
           loadFeed();
         }
       } catch (e) {
@@ -784,18 +1247,16 @@
     }
 
     async function doVerify(reportId, status) {
-      const officerId = document.getElementById('userSelector').value;
       try {
         const res = await fetch('/api/reports/' + reportId + '/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ officer_id: officerId, status, notes: 'Verified by Krishi Officer' })
+          body: JSON.stringify({ officer_id: currentUser.id, status, notes: 'Verified by Krishi Officer' })
         });
         if (!res.ok) {
           const err = await res.json();
           alert('Error: ' + err.detail);
         } else {
-          alert('Report officially updated to: ' + status);
           loadFeed();
         }
       } catch (e) {
@@ -803,14 +1264,101 @@
       }
     }
 
-    // Init on load and resize
+    async function loadAlerts() {
+      try {
+        const res = await fetch('/api/alerts');
+        globalAlerts = await res.json();
+        const unread = globalAlerts.filter(a => !a.is_read).length;
+        const badge = document.getElementById('alertsBadge');
+        if (unread > 0) {
+          badge.innerText = unread;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+        renderAlertsList();
+      } catch (err) {
+        console.error('Failed to load alerts', err);
+      }
+    }
+
+    function filterAlerts(category) {
+      activeAlertFilter = category;
+      ['all', 'salinity', 'verification'].forEach(cat => {
+        const btn = document.getElementById('btnAlertFilter' + (cat.charAt(0).toUpperCase() + cat.slice(1)));
+        if (btn) {
+          if (cat === category) {
+            btn.className = 'px-3 py-2 rounded-xl transition border bg-emerald-700 text-white border-emerald-700 shadow-sm';
+          } else {
+            btn.className = 'px-3 py-2 rounded-xl transition border bg-white text-gray-700 border-gray-200 hover:bg-gray-100';
+          }
+        }
+      });
+      renderAlertsList();
+    }
+
+    function renderAlertsList() {
+      const container = document.getElementById('alertsList');
+      if (!container) return;
+
+      const filtered = globalAlerts.filter(a => {
+        if (activeAlertFilter === 'all') return true;
+        if (activeAlertFilter === 'salinity') return a.category === 'salinity' || a.category === 'cluster';
+        if (activeAlertFilter === 'verification') return a.category === 'verification';
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="bg-white rounded-2xl border border-gray-200 p-8 text-center text-gray-500 text-xs">No alerts found in this category.</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(a => {
+        return `
+          <div class="rounded-2xl border p-4 transition shadow-sm ${a.is_read ? 'bg-white border-gray-200' : 'bg-emerald-50/30 border-emerald-300'}">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="font-extrabold text-sm text-gray-900">${a.title}</span>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${a.alert_level === 'Danger' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800'}">${a.alert_level}</span>
+                  ${!a.is_read ? '<span class="w-2 h-2 rounded-full bg-emerald-600"></span>' : ''}
+                </div>
+                <p class="text-xs text-gray-700 leading-relaxed font-medium">${a.description}</p>
+              </div>
+              <button onclick="jumpToAlertLocation(${a.location ? a.location.lat : 9.446}, ${a.location ? a.location.lng : 76.458})" class="px-2.5 py-1.5 bg-gray-100 hover:bg-emerald-50 text-gray-700 hover:text-emerald-800 font-bold rounded-xl text-xs transition border border-gray-200 shrink-0">
+                View on Map
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function markAllAlertsRead() {
+      try {
+        await fetch('/api/alerts/mark-read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        loadAlerts();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function jumpToAlertLocation(lat, lng) {
+      switchView('map');
+      if (currentMap) {
+        currentMap.setView([lat, lng], 14);
+        setMapDroppedPin(lat, lng);
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       initLeafletMap();
       renderDynamicInputs();
       loadFeed();
-      document.getElementById('userSelector').addEventListener('change', () => {
-        renderQueue();
-      });
       window.addEventListener('resize', () => {
         if (currentMap) currentMap.invalidateSize();
         if (reportPickerMap) reportPickerMap.invalidateSize();

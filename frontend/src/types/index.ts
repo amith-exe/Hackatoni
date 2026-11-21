@@ -1,3 +1,5 @@
+// frontend/src/types/index.ts
+
 export type ReportType = 'crop_disease' | 'salinity' | 'bird_deaths' | 'bund_seepage' | 'crop_loss';
 
 export type VerificationStatus = 'unconfirmed' | 'community_confirmed' | 'officially_verified' | 'rejected';
@@ -6,27 +8,27 @@ export type AlertLevel = 'Watch' | 'Warning' | 'Danger';
 
 export type Trend = 'new' | 'growing' | 'stable';
 
-export type FlowDirection = 'toward_sea' | 'inland' | 'unknown';
+export type Language = 'en' | 'ml';
 
 export interface ActionGuidance {
+  alert_level: AlertLevel;
   title: string;
   title_ml: string;
-  alert_level: AlertLevel;
   summary: string;
   bullet_points: string[];
   citation?: string;
   helpline?: string;
-  is_uncertain: boolean;
+  is_uncertain?: boolean;
 }
 
 export interface ReportItem {
   id: string;
   report_type: ReportType;
-  latitude: float;
-  longitude: float;
+  latitude: number;
+  longitude: number;
   canal_segment_id?: string;
   canal_name?: string;
-  flow_direction: FlowDirection;
+  flow_direction?: string;
   photo_url?: string;
   notes_text?: string;
   details: Record<string, any>;
@@ -36,17 +38,15 @@ export interface ReportItem {
   action_guidance?: ActionGuidance;
 }
 
-type float = number;
-
 export interface CanalSegment {
   id: string;
   name: string;
-  coordinates: [number, number][]; // [lng, lat]
-  upstream_segment_id?: string;
-  downstream_segment_id?: string;
-  current_alert_level?: AlertLevel;
-  salinity_ppt?: number;
-  alert_reason?: string;
+  coordinates: number[][]; // [[lng, lat], ...]
+  upstream_segment_id?: string | null;
+  downstream_segment_id?: string | null;
+  current_alert_level?: AlertLevel | null;
+  salinity_ppt?: number | null;
+  alert_reason?: string | null;
 }
 
 export interface ClusterItem {
@@ -63,26 +63,57 @@ export interface ClusterItem {
   alert_level: AlertLevel;
 }
 
+export interface RainfallSummary {
+  source: string;
+  status: string;
+  total_rain_24h_mm: number;
+  total_rain_48h_mm: number;
+  dilution_factor: string;
+}
+
 export interface MapFeedData {
   reports: ReportItem[];
   active_clusters: ClusterItem[];
   affected_canals: CanalSegment[];
-  rainfall_summary?: {
-    source: string;
-    status: string;
-    total_rain_24h_mm: number;
-    total_rain_48h_mm: number;
-    dilution_factor: string;
-  };
+  rainfall_summary?: RainfallSummary;
 }
 
-export interface Profile {
+export interface AlertItem {
+  id: string;
+  category: 'salinity' | 'cluster' | 'verification';
+  title: string;
+  description: string;
+  alert_level: AlertLevel;
+  timestamp: string;
+  location?: { lat: number; lng: number };
+  is_read: boolean;
+  metadata?: Record<string, any>;
+}
+
+export interface LocalTrendData {
+  query_latitude: number;
+  query_longitude: number;
+  nearest_landmark: string;
+  nearby_reports_count_7d: number;
+  prior_7d_reports_count: number;
+  trend_direction: 'Growing' | 'Stable' | 'Watch';
+  nearest_canal_name?: string;
+  nearest_canal_distance_km: number;
+  nearest_canal_salinity_ppt?: number;
+  nearest_canal_alert_level?: AlertLevel;
+  active_outbreak_nearby: boolean;
+  nearest_cluster_name?: string;
+  recommended_action: string;
+  reports_nearby: ReportItem[];
+}
+
+export interface UserProfile {
   id: string;
   name: string;
   phone: string;
   role: 'farmer' | 'officer';
   village_or_padasekharam: string;
-  farm_type: 'paddy' | 'duck' | 'both';
+  farm_type?: string;
   latitude: number;
   longitude: number;
 }

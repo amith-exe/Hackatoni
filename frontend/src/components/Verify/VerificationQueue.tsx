@@ -15,15 +15,16 @@ import {
   MapPin,
   Loader2,
   RefreshCw,
-  Droplet,
-  Wheat,
-  Bird,
-  ShieldAlert,
-  TrendingDown,
+  Waves,
+  Sprout,
+  Shield,
+  TrendingUp,
+  Check,
+  Info,
 } from 'lucide-react';
 
 export default function VerificationQueue() {
-  const { currentUser, isOfficer } = useDemoUser();
+  const { currentUser, isOfficer, t, language } = useDemoUser();
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'unconfirmed' | 'community_confirmed' | 'all'>('unconfirmed');
@@ -94,32 +95,32 @@ export default function VerificationQueue() {
   const getReportIcon = (type: string) => {
     switch (type) {
       case 'crop_disease':
-        return <Wheat className="w-4 h-4 text-emerald-600" />;
+        return <Sprout className="w-4 h-4 text-emerald-600" />;
       case 'salinity':
-        return <Droplet className="w-4 h-4 text-blue-600" />;
+        return <Waves className="w-4 h-4 text-blue-600" />;
       case 'bird_deaths':
-        return <Bird className="w-4 h-4 text-rose-600" />;
+        return <AlertTriangle className="w-4 h-4 text-rose-600" />;
       case 'bund_seepage':
-        return <ShieldAlert className="w-4 h-4 text-amber-600" />;
+        return <Shield className="w-4 h-4 text-amber-600" />;
       default:
-        return <TrendingDown className="w-4 h-4 text-purple-600" />;
+        return <TrendingUp className="w-4 h-4 text-purple-600" />;
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-4 pb-20">
+    <div className="max-w-3xl mx-auto p-4 sm:p-6 pb-20">
       {/* Header Banner */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-4">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 mb-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-lg font-black text-gray-900 flex items-center gap-2">
+            <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-emerald-700" />
-              <span>Trust Verification & Peer Review</span>
+              <span>{t('verifyQueueTitle')}</span>
             </h2>
-            <p className="text-xs text-gray-600 mt-0.5">
+            <p className="text-xs text-gray-600 mt-1">
               Acting as: <b className="text-emerald-800">{currentUser.name}</b> (
               <span className={isOfficer ? 'text-blue-700 font-bold' : 'text-emerald-700 font-bold'}>
-                {currentUser.role === 'officer' ? '🏛️ Krishi Bhavan Officer' : '🌾 Neighbor Farmer'}
+                {currentUser.role === 'officer' ? t('userRoleOfficer') : t('userRoleFarmer')}
               </span>
               )
             </p>
@@ -127,7 +128,7 @@ export default function VerificationQueue() {
           <button
             onClick={loadData}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-bold text-gray-700 transition self-start sm:self-auto"
+            className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-bold text-gray-700 transition self-start sm:self-auto border border-gray-200"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
@@ -135,12 +136,12 @@ export default function VerificationQueue() {
         </div>
 
         {/* Role guidance callout */}
-        <div className="mt-3 p-2.5 bg-emerald-50/70 border border-emerald-100 rounded-xl text-xs text-emerald-900 flex items-start gap-2">
-          <span className="text-sm">💡</span>
-          <div>
+        <div className="mt-3 p-3 bg-emerald-50/70 border border-emerald-100 rounded-xl text-xs text-emerald-950 flex items-start gap-2.5">
+          <Info className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+          <div className="leading-relaxed">
             {isOfficer ? (
               <span>
-                <b>Officer Inspection Mode:</b> You can officially verify or reject community reports to seal government insurance records.
+                <b>Officer Inspection Mode:</b> You can officially verify or reject community reports to seal government records and statutory AIMS compensation claims.
               </span>
             ) : (
               <span>
@@ -154,14 +155,14 @@ export default function VerificationQueue() {
       {/* Toast message */}
       {statusMessage && (
         <div
-          className={`p-3 mb-4 rounded-xl text-xs font-semibold flex items-center gap-2 ${
+          className={`p-3.5 mb-4 rounded-xl text-xs font-semibold flex items-center gap-2 ${
             statusMessage.type === 'success'
-              ? 'bg-emerald-100 border border-emerald-200 text-emerald-800'
-              : 'bg-red-100 border border-red-200 text-red-800'
+              ? 'bg-emerald-100 border border-emerald-200 text-emerald-900'
+              : 'bg-red-100 border border-red-200 text-red-900'
           }`}
         >
           {statusMessage.type === 'success' ? (
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
           ) : (
             <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
           )}
@@ -217,7 +218,7 @@ export default function VerificationQueue() {
         </div>
       ) : filteredReports.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center text-gray-500 text-xs">
-          No reports found in this queue category.
+          {t('noReportsToVerify')}
         </div>
       ) : (
         <div className="space-y-3">
@@ -246,7 +247,12 @@ export default function VerificationQueue() {
                         <span>•</span>
                         <span className="flex items-center gap-0.5">
                           <Clock className="w-3 h-3 text-gray-400" />
-                          <span>{new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          <span>
+                            {new Date(report.created_at).toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
                         </span>
                       </div>
                     </div>
@@ -307,7 +313,10 @@ export default function VerificationQueue() {
                       {report.confirmations_count}
                     </span>
                     {report.confirmations_count >= 2 && (
-                      <span className="text-blue-600 font-bold text-[10px]">✓ Promoted</span>
+                      <span className="text-blue-600 font-bold text-[10px] flex items-center gap-0.5">
+                        <Check className="w-3 h-3 text-blue-600 inline" />
+                        <span>Promoted</span>
+                      </span>
                     )}
                   </div>
 
@@ -319,8 +328,12 @@ export default function VerificationQueue() {
                         disabled={isProcessing}
                         className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-1.5 px-3 rounded-xl text-xs transition flex items-center gap-1 disabled:opacity-50"
                       >
-                        {isProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                        <span>Confirm Report</span>
+                        {isProcessing ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                        )}
+                        <span>{t('confirmReportBtn')}</span>
                       </button>
                     )}
 
@@ -332,8 +345,12 @@ export default function VerificationQueue() {
                           disabled={isProcessing || report.verification_status === 'officially_verified'}
                           className="bg-blue-700 hover:bg-blue-800 text-white font-bold py-1.5 px-3 rounded-xl text-xs transition flex items-center gap-1 disabled:opacity-50"
                         >
-                          {isProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
-                          <span>Officially Verify</span>
+                          {isProcessing ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <ShieldCheck className="w-3.5 h-3.5" />
+                          )}
+                          <span>{t('officiallyVerifyBtn')}</span>
                         </button>
                         <button
                           onClick={() => handleOfficialVerify(report.id, 'rejected')}
@@ -341,7 +358,7 @@ export default function VerificationQueue() {
                           className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1.5 px-2.5 rounded-xl text-xs transition flex items-center gap-1 disabled:opacity-50"
                         >
                           <XCircle className="w-3.5 h-3.5 text-gray-500" />
-                          <span>Reject</span>
+                          <span>{t('rejectBtn')}</span>
                         </button>
                       </>
                     )}

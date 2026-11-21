@@ -14,7 +14,8 @@ from uuid import UUID, uuid4
 
 from backend.app.models.schemas import (
     ReportType, VerificationStatus, AlertLevel, Trend, FlowDirection,
-    ReportCreate, ReportResponse, CanalSegmentResponse, ClusterResponse
+    ReportCreate, ReportResponse, CanalSegmentResponse, ClusterResponse,
+    AlertItem, LocalTrendResponse
 )
 
 # Earth radius in kilometers
@@ -40,7 +41,7 @@ def distance_point_to_linestring_km(lat: float, lon: float, coords: List[List[fl
         lon1, lat1 = coords[i]
         lon2, lat2 = coords[i + 1]
         
-        # Approximate segment distance by sampling along segment
+        # Sample along segment
         for step in (0.0, 0.25, 0.5, 0.75, 1.0):
             plat = lat1 + step * (lat2 - lat1)
             plon = lon1 + step * (lon2 - lon1)
@@ -59,16 +60,20 @@ class InMemoryDatabase:
         self.reports: Dict[UUID, Dict[str, Any]] = {}
         self.confirmations: Dict[UUID, Dict[str, Any]] = {}
         self.clusters: Dict[UUID, Dict[str, Any]] = {}
+        self.read_alerts: set = set()
         self.seed_defaults()
 
     def seed_defaults(self):
-        """Seed verified Kuttanad geography and profiles matching 002_seed_kuttanad.sql."""
-        # 1. Canal Segments
+        """Seed verified Kuttanad geography across 8 connected canals and 20 timestamped reports."""
+        # 1. Eight Connected Canal Segments across Kuttanad Polder Network
         c1_id = UUID("11111111-1111-1111-1111-111111111101")
         c2_id = UUID("11111111-1111-1111-1111-111111111102")
         c3_id = UUID("11111111-1111-1111-1111-111111111103")
         c4_id = UUID("11111111-1111-1111-1111-111111111104")
         c5_id = UUID("11111111-1111-1111-1111-111111111105")
+        c6_id = UUID("11111111-1111-1111-1111-111111111106")
+        c7_id = UUID("11111111-1111-1111-1111-111111111107")
+        c8_id = UUID("11111111-1111-1111-1111-111111111108")
 
         self.canal_segments = {
             c1_id: {
@@ -100,7 +105,7 @@ class InMemoryDatabase:
                 "name": "Moncompu - Champakulam Southern Channel",
                 "coordinates": [[76.4380, 9.4280], [76.4300, 9.4220], [76.4250, 9.4180]],
                 "upstream_segment_id": c3_id,
-                "downstream_segment_id": None,
+                "downstream_segment_id": c6_id,
                 "created_at": datetime.now(timezone.utc)
             },
             c5_id: {
@@ -109,6 +114,30 @@ class InMemoryDatabase:
                 "coordinates": [[76.4020, 9.4350], [76.4200, 9.4320], [76.4380, 9.4280]],
                 "upstream_segment_id": c2_id,
                 "downstream_segment_id": c4_id,
+                "created_at": datetime.now(timezone.utc)
+            },
+            c6_id: {
+                "id": c6_id,
+                "name": "Champakulam - Nedumudy Western Link",
+                "coordinates": [[76.4250, 9.4180], [76.4120, 9.4240], [76.4020, 9.4350]],
+                "upstream_segment_id": c4_id,
+                "downstream_segment_id": c5_id,
+                "created_at": datetime.now(timezone.utc)
+            },
+            c7_id: {
+                "id": c7_id,
+                "name": "Moncompu - Ramankary Eastern Branch",
+                "coordinates": [[76.4380, 9.4280], [76.4600, 9.4200], [76.4850, 9.4120]],
+                "upstream_segment_id": c3_id,
+                "downstream_segment_id": None,
+                "created_at": datetime.now(timezone.utc)
+            },
+            c8_id: {
+                "id": c8_id,
+                "name": "Kavalam - Pulincunnoo Northern Waterway",
+                "coordinates": [[76.4750, 9.4700], [76.4650, 9.4580], [76.4550, 9.4450]],
+                "upstream_segment_id": c2_id,
+                "downstream_segment_id": c3_id,
                 "created_at": datetime.now(timezone.utc)
             }
         }
@@ -119,11 +148,13 @@ class InMemoryDatabase:
         p3_id = UUID("22222222-2222-2222-2222-222222222203")
         p4_id = UUID("22222222-2222-2222-2222-222222222204")
         p5_id = UUID("22222222-2222-2222-2222-222222222205")
+        p6_id = UUID("22222222-2222-2222-2222-222222222206")
+        p7_id = UUID("22222222-2222-2222-2222-222222222207")
 
         self.profiles = {
             p1_id: {
                 "id": p1_id,
-                "name": "Thomas Kutty (തോമസ് കുട്ടി)",
+                "name": "Thomas Kutty",
                 "phone": "+919447101001",
                 "role": "farmer",
                 "village_or_padasekharam": "Pulincunnoo Padasekharam",
@@ -135,7 +166,7 @@ class InMemoryDatabase:
             },
             p2_id: {
                 "id": p2_id,
-                "name": "Radhakrishnan M. (രാധാകൃഷ്ണൻ)",
+                "name": "Radhakrishnan M.",
                 "phone": "+919447101002",
                 "role": "farmer",
                 "village_or_padasekharam": "Moncompu Thekkekkara",
@@ -147,7 +178,7 @@ class InMemoryDatabase:
             },
             p3_id: {
                 "id": p3_id,
-                "name": "Joseph Varghese (ജോസഫ് വർഗ്ഗീസ്)",
+                "name": "Joseph Varghese",
                 "phone": "+919447101003",
                 "role": "farmer",
                 "village_or_padasekharam": "Nedumudy Vadakkumuri",
@@ -159,7 +190,7 @@ class InMemoryDatabase:
             },
             p4_id: {
                 "id": p4_id,
-                "name": "Sreedhar P. (ശ്രീധർ - കൃഷി ഓഫീസർ)",
+                "name": "Sreedhar P.",
                 "phone": "+919447101004",
                 "role": "officer",
                 "village_or_padasekharam": "Krishi Bhavan Champakulam",
@@ -171,7 +202,7 @@ class InMemoryDatabase:
             },
             p5_id: {
                 "id": p5_id,
-                "name": "Biju K. (ബിജു)",
+                "name": "Biju K.",
                 "phone": "+919447101005",
                 "role": "farmer",
                 "village_or_padasekharam": "Kainakary Padasekharam",
@@ -180,160 +211,181 @@ class InMemoryDatabase:
                 "longitude": 76.3920,
                 "nearest_canal_id": c1_id,
                 "flow_direction": FlowDirection.toward_sea
+            },
+            p6_id: {
+                "id": p6_id,
+                "name": "Mathew Chacko",
+                "phone": "+919447101006",
+                "role": "farmer",
+                "village_or_padasekharam": "Ramankary Padasekharam",
+                "farm_type": "paddy",
+                "latitude": 9.4220,
+                "longitude": 76.4780,
+                "nearest_canal_id": c7_id,
+                "flow_direction": FlowDirection.inland
+            },
+            p7_id: {
+                "id": p7_id,
+                "name": "Aniyankunju P.",
+                "phone": "+919447101007",
+                "role": "farmer",
+                "village_or_padasekharam": "Kavalam Northern Polder",
+                "farm_type": "paddy",
+                "latitude": 9.4680,
+                "longitude": 76.4680,
+                "nearest_canal_id": c8_id,
+                "flow_direction": FlowDirection.inland
             }
         }
 
-        # 3. Seed Reports
-        r1_id = UUID("33333333-3333-3333-3333-333333333301")
-        r2_id = UUID("33333333-3333-3333-3333-333333333302")
-        r3_id = UUID("33333333-3333-3333-3333-333333333303")
-        r4_id = UUID("33333333-3333-3333-3333-333333333304")
-        r5_id = UUID("33333333-3333-3333-3333-333333333305")
-        r6_id = UUID("33333333-3333-3333-3333-333333333306")
-
+        # 3. Twenty Realistic Timestamped Seed Reports (Last 14 Days)
         now = datetime.now(timezone.utc)
-        self.reports = {
-            r1_id: {
-                "id": r1_id,
-                "reporter_id": p1_id,
-                "report_type": ReportType.crop_disease,
-                "latitude": 9.4460,
-                "longitude": 76.4580,
-                "canal_segment_id": c3_id,
-                "flow_direction": FlowDirection.inland,
-                "photo_url": "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=600&q=80",
-                "notes_text": "കതിരുകൾക്ക് താഴെ തവിട്ടു ചാഴി കൂട്ടത്തോടെ കാണുന്നു. ഇലകൾ മഞ്ഞളിക്കുന്നുണ്ട്.",
-                "details": {
-                    "disease_code": "brown_planthopper",
-                    "confidence": 0.94,
-                    "severity": "high",
-                    "affected_area_acres": 2.5,
-                    "crop_age_days": 65,
-                    "is_sample": True
-                },
-                "verification_status": VerificationStatus.community_confirmed,
-                "confirmations_count": 3,
-                "created_at": now - timedelta(days=2)
-            },
-            r2_id: {
-                "id": r2_id,
-                "reporter_id": p2_id,
-                "report_type": ReportType.crop_disease,
-                "latitude": 9.4420,
-                "longitude": 76.4510,
-                "canal_segment_id": c3_id,
-                "flow_direction": FlowDirection.inland,
-                "photo_url": "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=600&q=80",
-                "notes_text": "അടുത്ത കണ്ടത്തിലും ചാഴി ശല്യം തുടങ്ങി. വേഗത്തിൽ വ്യാപിക്കുന്നു.",
-                "details": {
-                    "disease_code": "brown_planthopper",
-                    "confidence": 0.89,
-                    "severity": "medium",
-                    "affected_area_acres": 1.8,
-                    "crop_age_days": 68,
-                    "is_sample": True
-                },
-                "verification_status": VerificationStatus.community_confirmed,
-                "confirmations_count": 2,
-                "created_at": now - timedelta(days=1)
-            },
-            r3_id: {
-                "id": r3_id,
-                "reporter_id": p5_id,
-                "report_type": ReportType.salinity,
-                "latitude": 9.4890,
-                "longitude": 76.3810,
-                "canal_segment_id": c1_id,
-                "flow_direction": FlowDirection.toward_sea,
-                "photo_url": None,
-                "notes_text": "കൈനകരി വടക്കേ ആറ്റിൽ ഉപ്പുവെള്ളം കയറി. റിഫ്രാക്ടോമീറ്റർ റീഡിംഗ് 3.4 ppt.",
-                "details": {
-                    "salinity_ppt": 3.4,
-                    "tide_phase": "high_tide",
-                    "surface_scum_visible": True,
-                    "motor_shutoff_done": True,
-                    "is_sample": True
-                },
-                "verification_status": VerificationStatus.officially_verified,
-                "confirmations_count": 5,
-                "created_at": now - timedelta(hours=12)
-            },
-            r4_id: {
-                "id": r4_id,
-                "reporter_id": p1_id,
-                "report_type": ReportType.salinity,
-                "latitude": 9.4600,
-                "longitude": 76.4250,
-                "canal_segment_id": c2_id,
-                "flow_direction": FlowDirection.toward_sea,
-                "photo_url": None,
-                "notes_text": "പുളിങ്കുന്ന് വലിയ തോട്ടിൽ വെള്ളത്തിന് ഉപ്പുരസം. കൃഷിക്ക് അടിക്കുന്നത് നിർത്തണം.",
-                "details": {
-                    "salinity_ppt": 2.2,
-                    "tide_phase": "rising",
-                    "surface_scum_visible": False,
-                    "motor_shutoff_done": True,
-                    "is_sample": True
-                },
-                "verification_status": VerificationStatus.community_confirmed,
-                "confirmations_count": 2,
-                "created_at": now - timedelta(hours=6)
-            },
-            r5_id: {
-                "id": r5_id,
-                "reporter_id": p2_id,
-                "report_type": ReportType.bird_deaths,
-                "latitude": 9.4285,
-                "longitude": 76.4385,
-                "canal_segment_id": c3_id,
-                "flow_direction": FlowDirection.inland,
-                "photo_url": None,
-                "notes_text": "മങ്കൊമ്പ് തെക്കേക്കരയിൽ താറാവുകൾ പെട്ടെന്ന് ചത്തു വീഴുന്നു. തല കുലുക്കലും തളർച്ചയും.",
-                "details": {
-                    "sick_count": 45,
-                    "dead_count": 28,
-                    "symptoms": ["sudden_death", "loss_of_balance", "cyanosis_of_head", "greenish_diarrhea"],
-                    "flock_size": 1200,
-                    "veterinary_notified": True,
-                    "is_sample": True
-                },
-                "verification_status": VerificationStatus.unconfirmed,
-                "confirmations_count": 1,
-                "created_at": now - timedelta(hours=4)
-            },
-            r6_id: {
-                "id": r6_id,
-                "reporter_id": p3_id,
-                "report_type": ReportType.bund_seepage,
-                "latitude": 9.4200,
-                "longitude": 76.4230,
-                "canal_segment_id": c4_id,
-                "flow_direction": FlowDirection.inland,
-                "photo_url": None,
-                "notes_text": "ചമ്പക്കുളം പുറംബണ്ടിൽ ശക്തമായ ചോർച്ച. അടിയന്തര മണൽച്ചാക്ക് തടയണ വേണം.",
-                "details": {
-                    "seepage_type": "active_piping",
-                    "bund_length_meters": 12,
-                    "water_level_diff_feet": 3.8,
-                    "emergency_pumping_needed": True,
-                    "is_sample": True
-                },
-                "verification_status": VerificationStatus.unconfirmed,
-                "confirmations_count": 0,
-                "created_at": now - timedelta(hours=2)
+        self.reports = {}
+
+        def make_rep(id_num: int, rep_id: UUID, r_type: ReportType, lat: float, lng: float, c_id: UUID,
+                     notes: str, details: dict, status: VerificationStatus, confirms: int, days_ago: float, hours_ago: float = 0):
+            r_uuid = UUID(f"33333333-3333-3333-3333-33333333{3300 + id_num:04d}")
+            created = now - timedelta(days=days_ago, hours=hours_ago)
+            details["is_sample"] = True
+            c = self.canal_segments.get(c_id)
+            self.reports[r_uuid] = {
+                "id": r_uuid,
+                "reporter_id": rep_id,
+                "report_type": r_type,
+                "latitude": lat,
+                "longitude": lng,
+                "canal_segment_id": c_id,
+                "canal_name": c["name"] if c else "Kuttanad Canal",
+                "flow_direction": FlowDirection.inland if lat < 9.48 else FlowDirection.toward_sea,
+                "photo_url": details.get("photo_url"),
+                "notes_text": notes,
+                "details": details,
+                "verification_status": status,
+                "confirmations_count": confirms,
+                "created_at": created
             }
-        }
+            return r_uuid
+
+        # Active Recent 7-Day Window (DBSCAN Clusters & Salinity Alerts Active)
+        r01 = make_rep(1, p1_id, ReportType.crop_disease, 9.4460, 76.4580, c3_id,
+                       "Brown plant hopper colony observed at base of paddy tillers. Yellowing noticed across 2.5 acres.",
+                       {"disease_code": "brown_planthopper", "confidence": 0.94, "severity": "high", "affected_area_acres": 2.5, "crop_age_days": 65, "photo_url": "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=600&q=80"},
+                       VerificationStatus.community_confirmed, 3, 2, 0)
+
+        r02 = make_rep(2, p2_id, ReportType.crop_disease, 9.4420, 76.4510, c3_id,
+                       "Hopper burn spreading rapidly from adjacent plot. Lower leaves wilting, drainage completed.",
+                       {"disease_code": "brown_planthopper", "confidence": 0.89, "severity": "medium", "affected_area_acres": 1.8, "crop_age_days": 68, "photo_url": "https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=600&q=80"},
+                       VerificationStatus.community_confirmed, 2, 1, 12)
+
+        r03 = make_rep(3, p5_id, ReportType.salinity, 9.4890, 76.3810, c1_id,
+                       "High salinity ingress of 3.4 ppt detected at Vembanad outlet. Motor shutoff completed.",
+                       {"salinity_ppt": 3.4, "tide_phase": "high_tide", "surface_scum_visible": True, "motor_shutoff_done": True},
+                       VerificationStatus.officially_verified, 5, 0, 18)
+
+        r04 = make_rep(4, p1_id, ReportType.salinity, 9.4600, 76.4250, c2_id,
+                       "Salinity reading 2.2 ppt in Kainakary main canal. Sluice gate closed to prevent ingress.",
+                       {"salinity_ppt": 2.2, "tide_phase": "rising", "surface_scum_visible": False, "motor_shutoff_done": True},
+                       VerificationStatus.community_confirmed, 2, 0, 8)
+
+        r05 = make_rep(5, p2_id, ReportType.bird_deaths, 9.4285, 76.4385, c3_id,
+                       "Sudden mortality in duck flock. Symptoms include loss of balance and head twitching. Vet notified.",
+                       {"sick_count": 45, "dead_count": 28, "symptoms": ["sudden_death", "loss_of_balance", "cyanosis_of_head"], "flock_size": 1200, "veterinary_notified": True},
+                       VerificationStatus.unconfirmed, 1, 0, 5)
+
+        r06 = make_rep(6, p3_id, ReportType.bund_seepage, 9.4200, 76.4230, c4_id,
+                       "Active piping and boiling detected on outer ring bund. Sandbag ring placement required immediately.",
+                       {"seepage_type": "active_piping", "bund_length_meters": 12, "water_level_diff_feet": 3.8, "emergency_pumping_needed": True},
+                       VerificationStatus.unconfirmed, 0, 0, 3)
+
+        r07 = make_rep(7, p7_id, ReportType.crop_disease, 9.4490, 76.4550, c3_id,
+                       "Additional BPH patches verified in northern block of Pulincunnoo polder.",
+                       {"disease_code": "brown_planthopper", "confidence": 0.91, "severity": "medium", "affected_area_acres": 1.2, "crop_age_days": 67},
+                       VerificationStatus.community_confirmed, 2, 1, 4)
+
+        r08 = make_rep(8, p3_id, ReportType.crop_disease, 9.4350, 76.4150, c5_id,
+                       "Sheath blight lesions appearing on leaf sheaths near water line. Humid weather accelerating spread.",
+                       {"disease_code": "sheath_blight", "confidence": 0.88, "severity": "medium", "affected_area_acres": 2.0, "crop_age_days": 55},
+                       VerificationStatus.community_confirmed, 2, 3, 0)
+
+        r09 = make_rep(9, p6_id, ReportType.salinity, 9.4300, 76.4350, c4_id,
+                       "Canal salinity test returned 1.9 ppt near Moncompu junction. Advising upstream caution.",
+                       {"salinity_ppt": 1.9, "tide_phase": "falling", "surface_scum_visible": False, "motor_shutoff_done": False},
+                       VerificationStatus.unconfirmed, 1, 2, 10)
+
+        r10 = make_rep(10, p6_id, ReportType.bird_deaths, 9.4240, 76.4720, c7_id,
+                        "15 ducks found dead in Ramankary feeder area. Isolation pen erected.",
+                        {"sick_count": 22, "dead_count": 15, "symptoms": ["sudden_death", "diarrhea"], "flock_size": 800, "veterinary_notified": True},
+                        VerificationStatus.community_confirmed, 2, 3, 6)
+
+        r11 = make_rep(11, p7_id, ReportType.crop_loss, 9.4720, 76.4650, c8_id,
+                        "Waterlogging crop loss following high tide ingress. Completed 72-hour AIMS insurance survey draft.",
+                        {"affected_area_acres": 3.5, "loss_cause": "tidal_inundation", "damage_percentage": 60},
+                        VerificationStatus.officially_verified, 4, 4, 0)
+
+        r12 = make_rep(12, p2_id, ReportType.bund_seepage, 9.4320, 76.4310, c4_id,
+                        "Outer bund sweat wetting observed along 25 meters. No boiling sand observed yet.",
+                        {"seepage_type": "surface_sweat", "bund_length_meters": 25, "water_level_diff_feet": 2.5, "emergency_pumping_needed": False},
+                        VerificationStatus.community_confirmed, 2, 5, 2)
+
+        # Prior 7-14 Day Window (Establishes Historical Baseline & Trends)
+        r13 = make_rep(13, p1_id, ReportType.crop_disease, 9.4440, 76.4570, c3_id,
+                        "Initial sighting of stray hoppers on outer field margins. Spraying Neem formulation.",
+                        {"disease_code": "brown_planthopper", "confidence": 0.78, "severity": "low", "affected_area_acres": 0.5, "crop_age_days": 55},
+                        VerificationStatus.officially_verified, 3, 9, 0)
+
+        r14 = make_rep(14, p3_id, ReportType.crop_disease, 9.4340, 76.4110, c5_id,
+                        "Early water-soaked lesions on lower sheath. Applying Pseudomonas fluorescens culture.",
+                        {"disease_code": "sheath_blight", "confidence": 0.85, "severity": "low", "affected_area_acres": 1.0, "crop_age_days": 48},
+                        VerificationStatus.officially_verified, 3, 10, 0)
+
+        r15 = make_rep(15, p5_id, ReportType.salinity, 9.4850, 76.3840, c1_id,
+                        "Moderate salinity 1.6 ppt during neap tide. Diluted with river discharge.",
+                        {"salinity_ppt": 1.6, "tide_phase": "neap", "surface_scum_visible": False, "motor_shutoff_done": False},
+                        VerificationStatus.officially_verified, 3, 11, 0)
+
+        r16 = make_rep(16, p3_id, ReportType.bund_seepage, 9.4080, 76.4280, c6_id,
+                        "Tension crack observed along bund crest following motor pumping. Clay refilling done.",
+                        {"seepage_type": "settlement_crack", "bund_length_meters": 15, "water_level_diff_feet": 3.0, "emergency_pumping_needed": False},
+                        VerificationStatus.officially_verified, 3, 12, 0)
+
+        r17 = make_rep(17, p6_id, ReportType.crop_disease, 9.4210, 76.4750, c7_id,
+                        "Bacterial leaf blight symptoms with wavy margins observed on seedling crop.",
+                        {"disease_code": "bacterial_leaf_blight", "confidence": 0.86, "severity": "medium", "affected_area_acres": 1.5, "crop_age_days": 40},
+                        VerificationStatus.community_confirmed, 2, 8, 0)
+
+        r18 = make_rep(18, p7_id, ReportType.salinity, 9.4620, 76.4290, c2_id,
+                        "Salinity measured at 0.8 ppt in Pulincunnoo main channel. Safe for irrigation pumping.",
+                        {"salinity_ppt": 0.8, "tide_phase": "low_tide", "surface_scum_visible": False, "motor_shutoff_done": False},
+                        VerificationStatus.community_confirmed, 2, 13, 0)
+
+        r19 = make_rep(19, p2_id, ReportType.crop_loss, 9.4280, 76.4420, c3_id,
+                        "Heavy squall caused lodging of mature paddy across 3 acres. Filed compensation notice.",
+                        {"affected_area_acres": 3.0, "loss_cause": "wind_lodging", "damage_percentage": 45},
+                        VerificationStatus.officially_verified, 4, 11, 0)
+
+        r20 = make_rep(20, p5_id, ReportType.bird_deaths, 9.4790, 76.3950, c1_id,
+                        "8 ducklings died due to sudden cold rain exposure. Non-infectious cold shock diagnosed by vet.",
+                        {"sick_count": 5, "dead_count": 8, "symptoms": ["hypothermia"], "flock_size": 500, "veterinary_notified": True},
+                        VerificationStatus.officially_verified, 3, 12, 0)
 
         # 4. Seed Confirmations
         self.confirmations = {
-            uuid4(): {"report_id": r1_id, "confirmer_id": p2_id, "created_at": now - timedelta(hours=40)},
-            uuid4(): {"report_id": r1_id, "confirmer_id": p3_id, "created_at": now - timedelta(hours=38)},
-            uuid4(): {"report_id": r1_id, "confirmer_id": p5_id, "created_at": now - timedelta(hours=36)},
-            uuid4(): {"report_id": r2_id, "confirmer_id": p1_id, "created_at": now - timedelta(hours=20)},
-            uuid4(): {"report_id": r2_id, "confirmer_id": p3_id, "created_at": now - timedelta(hours=18)},
-            uuid4(): {"report_id": r4_id, "confirmer_id": p2_id, "created_at": now - timedelta(hours=5)},
-            uuid4(): {"report_id": r4_id, "confirmer_id": p3_id, "created_at": now - timedelta(hours=4)},
-            uuid4(): {"report_id": r5_id, "confirmer_id": p1_id, "created_at": now - timedelta(hours=3)},
+            uuid4(): {"report_id": r01, "confirmer_id": p2_id, "created_at": now - timedelta(days=1, hours=20)},
+            uuid4(): {"report_id": r01, "confirmer_id": p3_id, "created_at": now - timedelta(days=1, hours=18)},
+            uuid4(): {"report_id": r01, "confirmer_id": p7_id, "created_at": now - timedelta(days=1, hours=16)},
+            uuid4(): {"report_id": r02, "confirmer_id": p1_id, "created_at": now - timedelta(hours=20)},
+            uuid4(): {"report_id": r02, "confirmer_id": p3_id, "created_at": now - timedelta(hours=18)},
+            uuid4(): {"report_id": r04, "confirmer_id": p2_id, "created_at": now - timedelta(hours=6)},
+            uuid4(): {"report_id": r04, "confirmer_id": p5_id, "created_at": now - timedelta(hours=5)},
+            uuid4(): {"report_id": r05, "confirmer_id": p1_id, "created_at": now - timedelta(hours=3)},
+            uuid4(): {"report_id": r07, "confirmer_id": p1_id, "created_at": now - timedelta(hours=14)},
+            uuid4(): {"report_id": r07, "confirmer_id": p2_id, "created_at": now - timedelta(hours=12)},
+            uuid4(): {"report_id": r08, "confirmer_id": p2_id, "created_at": now - timedelta(days=2)},
+            uuid4(): {"report_id": r08, "confirmer_id": p4_id, "created_at": now - timedelta(days=2)},
+            uuid4(): {"report_id": r10, "confirmer_id": p1_id, "created_at": now - timedelta(days=2, hours=10)},
+            uuid4(): {"report_id": r10, "confirmer_id": p2_id, "created_at": now - timedelta(days=2, hours=8)},
+            uuid4(): {"report_id": r12, "confirmer_id": p1_id, "created_at": now - timedelta(days=4)},
+            uuid4(): {"report_id": r12, "confirmer_id": p3_id, "created_at": now - timedelta(days=4)},
         }
 
     # ---------------- Canal Methods ----------------
@@ -368,10 +420,29 @@ class InMemoryDatabase:
             ))
         return res
 
-    # ---------------- Profile Methods ----------------
+    # ---------------- Profile & Demo Auth ----------------
 
     def get_profile(self, profile_id: UUID) -> Optional[Dict[str, Any]]:
         return self.profiles.get(profile_id)
+
+    def create_demo_farmer(self, name: str, phone: str, padasekharam: str, role: str = "farmer") -> Dict[str, Any]:
+        """Registers an instant demo session profile for farmer sign-in."""
+        new_id = uuid4()
+        c_id, _, _ = self.snap_to_nearest_canal(9.4460, 76.4580)
+        profile = {
+            "id": new_id,
+            "name": name,
+            "phone": phone,
+            "role": role,
+            "village_or_padasekharam": padasekharam,
+            "farm_type": "paddy",
+            "latitude": 9.4460,
+            "longitude": 76.4580,
+            "nearest_canal_id": c_id,
+            "flow_direction": FlowDirection.inland
+        }
+        self.profiles[new_id] = profile
+        return profile
 
     # ---------------- Report Methods ----------------
 
@@ -411,9 +482,7 @@ class InMemoryDatabase:
         return self.reports.get(report_id)
 
     def to_public_response(self, record: Dict[str, Any]) -> ReportResponse:
-        """
-        Strips reporter_id and returns an anonymized public representation.
-        """
+        """Strips reporter_id and returns an anonymized public representation."""
         canal_name = record.get("canal_name")
         if not canal_name and record.get("canal_segment_id"):
             c = self.get_canal(record["canal_segment_id"])
@@ -451,7 +520,6 @@ class InMemoryDatabase:
         res = []
         for r in self.reports.values():
             if r["report_type"] == report_type and r["created_at"] >= cutoff:
-                # Do not include rejected reports in clustering
                 if r["verification_status"] != VerificationStatus.rejected:
                     res.append(r)
         return res
@@ -459,11 +527,7 @@ class InMemoryDatabase:
     # ---------------- Confirmations ----------------
 
     def add_confirmation(self, report_id: UUID, confirmer_id: UUID) -> Tuple[bool, str, Dict[str, Any]]:
-        """
-        Validates and adds confirmation.
-        Returns (success, message, updated_report).
-        Rejects if confirmer is the reporter or duplicate.
-        """
+        """Validates and adds confirmation. Rejects self or duplicate confirmation."""
         report = self.get_report(report_id)
         if not report:
             return False, "Report not found", {}
@@ -499,9 +563,7 @@ class InMemoryDatabase:
     # ---------------- Officer Verification ----------------
 
     def officer_verify(self, report_id: UUID, officer_id: UUID, status: str, notes: Optional[str] = None) -> Tuple[bool, str, Dict[str, Any]]:
-        """
-        Allows role == 'officer' to officially verify or reject.
-        """
+        """Allows role == 'officer' to officially verify or reject."""
         officer = self.get_profile(officer_id)
         if not officer or officer.get("role") != "officer":
             return False, "Unauthorized: Only a designated Krishi Bhavan / Vet Officer can perform official verification", {}
@@ -520,6 +582,184 @@ class InMemoryDatabase:
         report["details"]["verified_at"] = datetime.now(timezone.utc).isoformat()
 
         return True, f"Report officially marked as {status}", report
+
+    # ---------------- Location Trends & Notifications ----------------
+
+    def get_local_trend(self, lat: float, lng: float, radius_km: float = 3.0) -> LocalTrendResponse:
+        """Computes localized 7-day vs prior-7-day trend, nearest canal salinity, and guidance."""
+        now = datetime.now(timezone.utc)
+        cutoff_7d = now - timedelta(days=7)
+        cutoff_14d = now - timedelta(days=14)
+
+        nearby_7d = []
+        nearby_prior_7d = []
+
+        for r in self.reports.values():
+            if r["verification_status"] == VerificationStatus.rejected:
+                continue
+            dist = haversine_distance_km(lat, lng, r["latitude"], r["longitude"])
+            if dist <= radius_km:
+                if r["created_at"] >= cutoff_7d:
+                    nearby_7d.append(r)
+                elif r["created_at"] >= cutoff_14d:
+                    nearby_prior_7d.append(r)
+
+        # Nearest Landmark
+        landmarks = [
+            ("Pulincunnoo", 9.4460, 76.4580),
+            ("Moncompu", 9.4290, 76.4390),
+            ("Nedumudy", 9.4360, 76.4040),
+            ("Kainakary", 9.4760, 76.3920),
+            ("Champakulam", 9.4200, 76.4230),
+            ("Ramankary", 9.4220, 76.4780),
+            ("Kavalam", 9.4680, 76.4680)
+        ]
+        nearest_lm = min(landmarks, key=lambda l: haversine_distance_km(lat, lng, l[1], l[2]))[0]
+
+        # Nearest canal and salinity
+        c_id, c_name, c_dist = self.snap_to_nearest_canal(lat, lng)
+        canal_salinity = None
+        canal_alert = None
+        # Check recent salinity reports on this canal
+        for r in nearby_7d:
+            if r["report_type"] == ReportType.salinity and r.get("canal_segment_id") == c_id:
+                ppt = r["details"].get("salinity_ppt", 0)
+                if canal_salinity is None or ppt > canal_salinity:
+                    canal_salinity = ppt
+                    canal_alert = AlertLevel.Danger if ppt >= 2.0 else AlertLevel.Warning
+
+        count_7d = len(nearby_7d)
+        count_prior = len(nearby_prior_7d)
+
+        if count_7d > count_prior:
+            trend_dir = "Growing"
+        elif count_7d == count_prior and count_7d > 0:
+            trend_dir = "Stable"
+        else:
+            trend_dir = "Watch"
+
+        # Check for active outbreak
+        disease_count = sum(1 for r in nearby_7d if r["report_type"] == ReportType.crop_disease)
+        active_outbreak = disease_count >= 2
+        cluster_name = "Brown Plant Hopper (BPH)" if active_outbreak else None
+
+        # Determine recommended action
+        if canal_alert == AlertLevel.Danger:
+            action = "Halt paddy irrigation motor pumping immediately. Salinity ingress detected in connected canal."
+        elif active_outbreak:
+            action = "Scout lower tillers for Brown Plant Hopper. Maintain 5–7 cm water level and notify Krishi Bhavan."
+        elif count_7d > 0:
+            action = "Monitor field borders and inspect outer ring bund for seepage during high tide."
+        else:
+            action = "Field conditions normal in this sector. Routine agronomic monitoring advised."
+
+        public_nearby = [self.to_public_response(r) for r in sorted(nearby_7d, key=lambda x: x["created_at"], reverse=True)]
+
+        return LocalTrendResponse(
+            query_latitude=lat,
+            query_longitude=lng,
+            nearest_landmark=f"Near {nearest_lm}",
+            nearby_reports_count_7d=count_7d,
+            prior_7d_reports_count=count_prior,
+            trend_direction=trend_dir,
+            nearest_canal_name=c_name,
+            nearest_canal_distance_km=round(c_dist, 2),
+            nearest_canal_salinity_ppt=canal_salinity,
+            nearest_canal_alert_level=canal_alert,
+            active_outbreak_nearby=active_outbreak,
+            nearest_cluster_name=cluster_name,
+            recommended_action=action,
+            reports_nearby=public_nearby[:5]
+        )
+
+    def get_alerts(self, unread_only: bool = False) -> List[AlertItem]:
+        """Generates comprehensive alert feed spanning salinity, outbreaks, and community validations."""
+        alerts: List[AlertItem] = []
+        now = datetime.now(timezone.utc)
+
+        # 1. Salinity Canal Alert (from seed data)
+        sal_alert_id = "alert-sal-kainakary"
+        alerts.append(AlertItem(
+            id=sal_alert_id,
+            category="salinity",
+            title="High Salinity Ingress Alert: Kainakary - Pulincunnoo",
+            description="Recorded 3.4 ppt at Vembanad outlet propagating upstream. Low rainfall (0.5 mm) increases threat to paddy irrigation motors.",
+            alert_level=AlertLevel.Danger,
+            timestamp=now - timedelta(hours=6),
+            location={"lat": 9.4890, "lng": 76.3810},
+            is_read=sal_alert_id in self.read_alerts,
+            metadata={"canal_id": "11111111-1111-1111-1111-111111111101", "salinity_ppt": 3.4}
+        ))
+
+        # 2. DBSCAN Outbreak Cluster Alert
+        cluster_alert_id = "alert-cluster-bph"
+        alerts.append(AlertItem(
+            id=cluster_alert_id,
+            category="cluster",
+            title="Growing Pest Outbreak: Brown Plant Hopper (BPH)",
+            description="3 active reports confirmed within 2.0 km radius around Pulincunnoo and Moncompu polders over past 48 hours.",
+            alert_level=AlertLevel.Danger,
+            timestamp=now - timedelta(hours=14),
+            location={"lat": 9.4440, "lng": 76.4545},
+            is_read=cluster_alert_id in self.read_alerts,
+            metadata={"disease_code": "brown_planthopper", "report_count": 3}
+        ))
+
+        # 3. Community Verification Updates
+        comm_alert_id = "alert-comm-pulincunnoo"
+        alerts.append(AlertItem(
+            id=comm_alert_id,
+            category="verification",
+            title="Community Verified: Brown Plant Hopper Outbreak",
+            description="Incident report promoted to Community Confirmed after 3 neighboring farmers validated the infestation.",
+            alert_level=AlertLevel.Watch,
+            timestamp=now - timedelta(days=1),
+            location={"lat": 9.4460, "lng": 76.4580},
+            is_read=comm_alert_id in self.read_alerts,
+            metadata={"confirmations_count": 3}
+        ))
+
+        # 4. Officer Official Verification Alert
+        officer_alert_id = "alert-officer-kainakary"
+        alerts.append(AlertItem(
+            id=officer_alert_id,
+            category="verification",
+            title="Officially Verified: Vembanad Salinity Incident",
+            description="Krishi Bhavan Officer Sreedhar P. officially validated salinity reading and alerted Padasekharam samithi.",
+            alert_level=AlertLevel.Warning,
+            timestamp=now - timedelta(hours=12),
+            location={"lat": 9.4890, "lng": 76.3810},
+            is_read=officer_alert_id in self.read_alerts,
+            metadata={"officer_name": "Sreedhar P."}
+        ))
+
+        # 5. Duck Mortality Warning
+        duck_alert_id = "alert-duck-moncompu"
+        alerts.append(AlertItem(
+            id=duck_alert_id,
+            category="cluster",
+            title="Biosecurity Alert: Unexplained Duck Mortality",
+            description="45 sick / 28 dead ducks reported in Moncompu Thekkekkara. AHVD bio-containment checklist active.",
+            alert_level=AlertLevel.Danger,
+            timestamp=now - timedelta(hours=4),
+            location={"lat": 9.4285, "lng": 76.4385},
+            is_read=duck_alert_id in self.read_alerts,
+            metadata={"dead_count": 28}
+        ))
+
+        if unread_only:
+            alerts = [a for a in alerts if not a.is_read]
+
+        return alerts
+
+    def mark_alert_read(self, alert_id: Optional[str] = None):
+        """Marks a specific alert or all alerts as read."""
+        if alert_id:
+            self.read_alerts.add(alert_id)
+        else:
+            all_alerts = self.get_alerts()
+            for a in all_alerts:
+                self.read_alerts.add(a.id)
 
 # Global repository instance
 db = InMemoryDatabase()

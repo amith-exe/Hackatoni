@@ -1,5 +1,5 @@
 // frontend/src/lib/api.ts
-import { MapFeedData, ReportItem, Profile } from '@/types';
+import { MapFeedData, ReportItem, UserProfile, AlertItem, LocalTrendData } from '@/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL 
   ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`
@@ -65,13 +65,13 @@ export async function verifyReport(
   return res.json();
 }
 
-export async function fetchProfiles(): Promise<Profile[]> {
+export async function fetchProfiles(): Promise<UserProfile[]> {
   const res = await fetch(`${API_BASE}/profiles`, { cache: 'no-store' });
   if (!res.ok) {
     return [
       {
         id: '22222222-2222-2222-2222-222222222201',
-        name: 'Thomas Kutty (തോമസ് കുട്ടി)',
+        name: 'Thomas Kutty',
         phone: '+919447101001',
         role: 'farmer',
         village_or_padasekharam: 'Pulincunnoo Padasekharam',
@@ -81,7 +81,7 @@ export async function fetchProfiles(): Promise<Profile[]> {
       },
       {
         id: '22222222-2222-2222-2222-222222222202',
-        name: 'Radhakrishnan M. (രാധാകൃഷ്ണൻ)',
+        name: 'Radhakrishnan M.',
         phone: '+919447101002',
         role: 'farmer',
         village_or_padasekharam: 'Moncompu Thekkekkara',
@@ -91,7 +91,7 @@ export async function fetchProfiles(): Promise<Profile[]> {
       },
       {
         id: '22222222-2222-2222-2222-222222222204',
-        name: 'Sreedhar P. (ശ്രീധർ - കൃഷി ഓഫീസർ)',
+        name: 'Sreedhar P.',
         phone: '+919447101004',
         role: 'officer',
         village_or_padasekharam: 'Krishi Bhavan Champakulam',
@@ -104,10 +104,48 @@ export async function fetchProfiles(): Promise<Profile[]> {
   return res.json();
 }
 
-export async function fetchOfficerDashboard() {
-  const res = await fetch(`${API_BASE}/officer/dashboard`, { cache: 'no-store' });
+export async function fetchAlerts(category?: string): Promise<AlertItem[]> {
+  const url = category && category !== 'all' 
+    ? `${API_BASE}/alerts?category=${category}` 
+    : `${API_BASE}/alerts`;
+  const res = await fetch(url, { cache: 'no-store' });
   if (!res.ok) {
-    throw new Error(`Failed to load officer dashboard: ${res.statusText}`);
+    throw new Error(`Failed to load alerts: ${res.statusText}`);
+  }
+  return res.json();
+}
+
+export async function markAlertsRead(alertId?: string): Promise<{ status: string }> {
+  const res = await fetch(`${API_BASE}/alerts/mark-read`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ alert_id: alertId }),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to mark alert as read: ${res.statusText}`);
+  }
+  return res.json();
+}
+
+export async function fetchLocalTrend(lat: number, lng: number, radiusKm: number = 3.0): Promise<LocalTrendData> {
+  const res = await fetch(`${API_BASE}/trends/local?lat=${lat}&lng=${lng}&radius_km=${radiusKm}`, {
+    cache: 'no-store',
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to load local trend: ${res.statusText}`);
+  }
+  return res.json();
+}
+
+export async function demoLogin(name: string, phone: string, padasekharam: string, role: string = 'farmer') {
+  const res = await fetch(`${API_BASE}/auth/demo-login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, phone, padasekharam, role }),
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new Error(errorData.detail || 'Demo login failed');
   }
   return res.json();
 }
