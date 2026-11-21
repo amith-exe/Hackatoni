@@ -375,3 +375,23 @@ flowchart LR
   Weather --> Map
   Verify --> Alert
 ```
+
+### Use-Case Diagram Key
+
+| Diagram box | Meaning |
+|---|---|
+| **Paddy farmer** | Uses GPS, Leaf Scan, manual reporting, trend analysis, and alerts to protect a field. |
+| **Neighboring farmer** | Reviews nearby unconfirmed reports and adds a community confirmation. |
+| **Krishi Bhavan officer** | Filters incidents, runs DBSCAN comparisons, and officially verifies or rejects reports. |
+| **Live Map** | Shows anonymized reports, canal alerts, outbreak circles, and selected locations. |
+| **Filters** | Hides irrelevant categories, diseases, time windows, verification states, and map layers. |
+| **Leaf Scan** | Sends a leaf image to Gemini Vision and displays the confidence-safe KAU action plan. |
+| **Submit incident** | Creates a crop, salinity, bird, bund, or crop-loss report. |
+| **Run DBSCAN trend** | Finds local disease/threat clusters, isolated noise, growth, and 3 km location context. |
+| **Confirm neighbor report** | Adds a unique peer confirmation and can promote a report to `community_confirmed`. |
+| **Verify or reject report** | Represents the officer review step in the trust lifecycle. |
+| **Receive alerts** | Delivers salinity, outbreak, and verification updates to the farmer or officer. |
+| **View safe action plan** | Shows deterministic KAU or safety guidance; uncertain AI results show no chemical advice. |
+| **Gemini Vision** | Produces structured disease code, confidence, and visual observations from a leaf image. |
+| **KAU remedy registry** | Supplies curated disease actions and source citations instead of generated treatments. |
+| **Open-Meteo** | Supplies rainfall telemetry used for salinity dilution analysis. |
