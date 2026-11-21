@@ -78,19 +78,19 @@ DBSCAN (Density-Based Spatial Clustering of Applications with Noise) uses geogra
 
 ## User Workflows
 
-### Persona A — Paddy farmer: Thomas Kutty, Pulincunnoo
+### Persona A — Paddy farmer in Pulincunnoo
 
 1. Opens the PWA, uses the `EN / ML` toggle, and uses GPS or a dropped map pin to check local reports, rainfall, and canal salinity.
 2. Sees yellowing leaves and opens `/scan`, uploads a photo, or tries a demo sample.
 3. Receives a KAU action plan or the safe low-confidence fallback. The current code does not yet include live Sarvam STT/TTS.
 4. Reports the diagnosis to the Live Map and receives subsequent alerts as neighbors confirm the event.
 
-### Persona B — Neighboring farmer: Radhakrishnan M., Moncompu
+### Persona B — Neighboring farmer in Moncompu
 
 1. Sees an amber `unconfirmed` report in Verify Queue or Alerts.
 2. Confirms it once. Self-confirmation and duplicate votes are blocked; the second unique peer confirmation promotes it to `community_confirmed`.
 
-### Persona C — Krishi Bhavan officer: Sreedhar P., Champakulam
+### Persona C — Krishi Bhavan officer in Champakulam
 
 1. Filters by category, disease, verification state, and 24-hour/7-day/14-day window.
 2. Compares Pulincunnoo, Alappuzha, Kumarakom, Thrissur Kole, or Palakkad with Find Trend (Run DBSCAN).
