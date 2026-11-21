@@ -188,20 +188,6 @@ Place final screenshots in `docs/screenshots/` using the filenames below. These 
 <!-- Screenshot placeholder: selected location, 3 km ring, highlighted cluster, cluster/noise counts, current-vs-prior counts, and canal status. -->
 <img width="436" height="593" alt="image" src="https://github.com/user-attachments/assets/0fca41b8-d68f-48a9-b82a-a3476f21a0aa" />
 
-### Leaf Scan
-
-<!-- Screenshot placeholder: real demo leaf image, disease name, confidence, visual clues, and vetted KAU action plan. -->
-![Gemini leaf diagnosis](docs/screenshots/04-gemini-leaf-scan.png)
-
-### Safety State
-
-<!-- Screenshot placeholder: blurry sample showing “Not sure — ask your Krishi Bhavan” and no chemical advice. -->
-![Uncertain diagnosis safety state](docs/screenshots/05-uncertain-safety-state.png)
-
-### Verification
-
-<!-- Screenshot placeholder: submitted map report, Verify Queue confirmation state, and officer verification view. -->
-![Report and trust verification](docs/screenshots/06-trust-verification.png)
 
 ### Capture Tips
 
