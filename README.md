@@ -1,6 +1,6 @@
 # PadamGuardian / Karshakan Lens
 
-## Community-Verified Geospatial Early-Warning & Agronomic Intelligence Network for Kuttanad
+## Overview
 
 Karshakan Lens is a mobile-first PWA for Kuttanad farmers and Krishi Bhavan officers. It combines:
 
@@ -10,19 +10,19 @@ Karshakan Lens is a mobile-first PWA for Kuttanad farmers and Krishi Bhavan offi
 
 The platform turns a local observation into a spatially aware warning, a vetted agronomic action, and a trusted community record.
 
-## Solution First: Stop Crop Disease Outbreaks Early
+## Solution
 
 **PadamGuardian / Karshakan Lens solves Alappuzha's crop-outbreak visibility problem by turning scattered farmer observations into trusted, map-based outbreak intelligence.** A farmer uploads a leaf, drops a GPS pin, or reports a field issue. The system diagnoses or classifies the observation, snaps it to the nearest canal/padasekharam, compares current and previous activity, and shows whether nearby reports form a growing outbreak.
 
 The solution combines Gemini Vision, curated KAU remedies, community verification, canal-aware context, and **Haversine DBSCAN**. DBSCAN is the core engine that distinguishes a real disease outbreak from isolated reports and shows where the outbreak is spreading.
 
-## Primary Problem: Crop Disease Outbreaks in Alappuzha
+## Main Problem: Crop Disease Outbreaks
 
 Alappuzha's Kuttanad farming belt is a connected disease-spread environment. Paddy plots are packed into embanked *padasekharams*, humidity remains high, and farmers often see the first symptoms days before a field inspection reaches every polder. Brown Planthopper (*chazhi*), hopperburn, Sheath Blight, Bacterial Leaf Blight, Rice Blast, Sheath Rot, Brown Leaf Spot, Rice Tungro, Stem Borer, Leaf Folder, Gall Midge, Hispa, False Smut, and Grain Discoloration can spread across neighboring fields quickly.
 
 The practical problem is not only diagnosis. It is knowing when several observations represent the same outbreak, where it is moving, and which farmers or officers need to act first.
 
-### How the platform solves the outbreak problem
+### How It Works
 
 - **Field signal:** `/scan` accepts a real leaf photo and returns a structured disease code, confidence, visual observations, and image quality.
 - **Safety boundary:** confidence below 0.70 returns `Not sure — ask your Krishi Bhavan` with no chemical spray advice.
@@ -31,11 +31,11 @@ The practical problem is not only diagnosis. It is knowing when several observat
 - **Human validation:** reports become `community_confirmed` after two unique peer confirmations and can then be officially verified.
 - **Decision view:** the Live Map and “What's Spreading Now” panel show current versus previous counts, cluster centers, affected areas, and actions.
 
-## Kuttanad's Connected Crises
+## Other Kuttanad Problems
 
 Kuttanad spans Alappuzha and Kottayam districts of Kerala and is widely known for below-sea-level farming. Paddy is cultivated inside embanked polders called *padasekharams*, often around 1.5–2.5 metres below sea level, with interconnected canals and Vembanad Lake controlling the water system.
 
-### Five recurring crises and the system response
+### Problems and Solutions
 
 1. **Tidal salinity intrusion (*uppuvellam*) and shutter leakage**
 
@@ -67,7 +67,7 @@ Kuttanad spans Alappuzha and Kottayam districts of Kerala and is widely known fo
 
    **Solution:** `crop_loss` reports preserve coordinates, timestamps, notes, and structured loss details for officer review, with deterministic AIMS/PMFBY evidence guidance.
 
-## Why DBSCAN Is the Core Outbreak Algorithm
+## Why DBSCAN
 
 DBSCAN (Density-Based Spatial Clustering of Applications with Noise) uses geographic Haversine distance. The interactive trend endpoint uses a 7-day current window, a prior comparison window, requested `eps` (default 2.0 km), and `min_samples=3`. The map feed uses configured overview defaults.
 
@@ -76,27 +76,27 @@ DBSCAN (Density-Based Spatial Clustering of Applications with Noise) uses geogra
 - **No cluster-count guess:** unlike K-Means, DBSCAN does not require a predetermined number of outbreaks.
 - **Interactive comparison:** users can choose a GPS point, map point, or padasekharam preset, run `POST /api/trends/analyze`, compare clustered versus noise reports, and retain multiple location runs.
 
-## User Workflows
+## User Flows
 
-### Persona A — Paddy farmer in Pulincunnoo
+### Farmer Flow
 
 1. Opens the PWA, uses the `EN / ML` toggle, and uses GPS or a dropped map pin to check local reports, rainfall, and canal salinity.
 2. Sees yellowing leaves and opens `/scan`, uploads a photo, or tries a demo sample.
 3. Receives a KAU action plan or the safe low-confidence fallback. The current code does not yet include live Sarvam STT/TTS.
 4. Reports the diagnosis to the Live Map and receives subsequent alerts as neighbors confirm the event.
 
-### Persona B — Neighboring farmer in Moncompu
+### Neighbor Flow
 
 1. Sees an amber `unconfirmed` report in Verify Queue or Alerts.
 2. Confirms it once. Self-confirmation and duplicate votes are blocked; the second unique peer confirmation promotes it to `community_confirmed`.
 
-### Persona C — Krishi Bhavan officer in Champakulam
+### Officer Flow
 
 1. Filters by category, disease, verification state, and 24-hour/7-day/14-day window.
 2. Compares Pulincunnoo, Alappuzha, Kumarakom, Thrissur Kole, or Palakkad with Find Trend (Run DBSCAN).
 3. Marks reports `officially_verified` or `rejected` and prioritizes growing clusters, Danger canal branches, mortality events, and bund seepage.
 
-## Complete Report and Trust Lifecycle
+## Report Flow
 
 ```mermaid
 flowchart TD
@@ -119,7 +119,7 @@ flowchart TD
   Officer --> Rejected[rejected]
 ```
 
-## System Architecture
+## Architecture
 
 ```mermaid
 flowchart LR
@@ -155,7 +155,7 @@ flowchart LR
 
 The running demo currently uses `InMemoryDatabase` in `backend/app/services/db.py`, seeded at startup. The SQL migrations describe the production PostGIS design; a live Supabase/Postgres repository is not yet connected to the FastAPI runtime.
 
-## Detailed Documentation
+## Documentation
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) — detailed Mermaid system architecture, request paths, runtime modules, and deployment boundaries.
 - [DB.md](DB.md) — Mermaid entity-relationship model, PostGIS spatial design, privacy boundaries, indexes, and trust integrity.
@@ -163,37 +163,50 @@ The running demo currently uses `InMemoryDatabase` in `backend/app/services/db.p
 
 Use these three guides alongside this README: the README explains the product and judge story, `ARCHITECTURE.md` explains component relationships, `DB.md` explains data ownership and spatial storage, and `WORKFLOW.md` explains how a field observation becomes a verified action.
 
-## Screenshots to Add
+## Screenshots
 
 Place final screenshots in `docs/screenshots/` using the filenames below. These placeholders make the README ready for visual evidence without committing browser chrome or personal data.
 
-### 1. Live Map and outbreak overview
+### Live Map
 
 <!-- Screenshot placeholder: Live Map showing Kuttanad pins, canals, DBSCAN circles, telemetry, and the “Show All Data” control. -->
 <img width="1535" height="751" alt="image" src="https://github.com/user-attachments/assets/24c7ca99-e10c-4e48-aa65-9bae32c12076" />
 
 
-### 2. Filters and visible-layer controls
+### Filters
 
 <!-- Screenshot placeholder: Filters & Find Trend panel showing category, disease, verification, time-window, and Reports/Clusters/Canals toggles. -->
 <img width="1510" height="677" alt="image" src="https://github.com/user-attachments/assets/1aab7c91-2979-477b-ba6d-173c9f046846" />
 
 
-### 3. Multi-location DBSCAN trend analysis
+### Trend Analysis
 
 <!-- Screenshot placeholder: selected location, 3 km ring, highlighted cluster, cluster/noise counts, current-vs-prior counts, and canal status. -->
 <img width="436" height="593" alt="image" src="https://github.com/user-attachments/assets/0fca41b8-d68f-48a9-b82a-a3476f21a0aa" />
 
+### Leaf Scan
 
+<!-- Screenshot placeholder: real demo leaf image, disease name, confidence, visual clues, and vetted KAU action plan. -->
+![Gemini leaf diagnosis](docs/screenshots/04-gemini-leaf-scan.png)
 
-### Screenshot capture guidance
+### Safety State
+
+<!-- Screenshot placeholder: blurry sample showing “Not sure — ask your Krishi Bhavan” and no chemical advice. -->
+![Uncertain diagnosis safety state](docs/screenshots/05-uncertain-safety-state.png)
+
+### Verification
+
+<!-- Screenshot placeholder: submitted map report, Verify Queue confirmation state, and officer verification view. -->
+![Report and trust verification](docs/screenshots/06-trust-verification.png)
+
+### Capture Tips
 
 - Use a clean 1440×900 or 1280×800 browser viewport.
 - Capture the app only; exclude browser tabs, API keys, phone numbers, and personal GPS details.
 - Prefer one screenshot per capability, with the important panel fully visible.
 - For the strongest demo set, capture Pulincunnoo, Alappuzha, Kumarakom, or Palakkad as the selected trend location.
 
-## Database Design
+## Database
 
 | Table | Purpose | Spatial/integrity details |
 |---|---|---|
@@ -206,7 +219,7 @@ Place final screenshots in `docs/screenshots/` using the filenames below. These 
 
 `supabase/001_init_postgis.sql` defines `find_nearest_canal_segment(pt_geog)`, which orders canal geometries by spatial distance. The local repository mirrors this with Haversine point-to-linestring emulation.
 
-## Gemini Vision and Sarvam AI
+## AI Integration
 
 ### Gemini Vision
 
@@ -223,11 +236,11 @@ Responses include confidence, visual observations, image quality, nearby report 
 
 The scanner includes three offline samples plus the real `frontend/demo data/image.png` asset. The real demo image has been tested through the Gemini upload path and returned a Rice Blast result with a KAU action plan.
 
-### Sarvam status
+### Sarvam Status
 
 The product design reserves `saaras:v3`/`saarika:v2.5` STT and `bulbul:v3`/`bulbul:v2` TTS for Malayalam `ml-IN` voice notes and spoken action plans. Sarvam is not currently wired as a live SDK, router, or dependency in this repository. The current safe path is typed notes, scanner observations, curated KAU text, and the EN/ML UI toggle.
 
-## Important API Endpoints
+## API
 
 | Method | Endpoint | Purpose |
 |---|---|---|
@@ -244,7 +257,7 @@ The product design reserves `saaras:v3`/`saarika:v2.5` STT and `bulbul:v3`/`bulb
 
 Public report, map, and officer response models omit `reporter_id`, names, and phone numbers.
 
-## Quick Start
+## Setup
 
 ### Backend
 
@@ -296,7 +309,7 @@ supabase/002_seed_kuttanad.sql
 
 These create the six core tables, spatial indexes, canal seed graph, KAU remedies, profiles, and sample reports. The local FastAPI demo does not require Supabase to start.
 
-## Safety, Privacy, and Demo Boundaries
+## Safety and Privacy
 
 - Low-confidence leaf diagnosis never exposes chemical spray advice.
 - KAU actions are deterministic registry lookups, not generated treatment plans.
@@ -306,7 +319,7 @@ These create the six core tables, spatial indexes, canal seed graph, KAU remedie
 - OpenStreetMap/Esri and Open-Meteo are external services; fallback data keeps core demo flows usable.
 - Production hardening should connect PostGIS, add authenticated role claims, restrict CORS, wire Sarvam, and replace deterministic classifier fallbacks with an audited model/service.
 
-## Judge Demo Plan
+## Demo Plan
 
 1. Open the Live Map and click **Show All Data**.
 2. Open **Filters & Find Trend** and show the `24 Hours / 7 Days / 14 Days`, category, disease, verification, and visible-layer controls.
@@ -320,7 +333,7 @@ These create the six core tables, spatial indexes, canal seed graph, KAU remedie
 
 **Core thesis:** PadamGuardian connects place, people, and practical agronomy before a local warning becomes a regional loss.
 
-## Mermaid Use-Case Diagram
+## Use Case Diagram
 
 ```mermaid
 flowchart LR
