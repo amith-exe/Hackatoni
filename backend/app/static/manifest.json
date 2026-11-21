@@ -1,0 +1,16 @@
+{
+  "name": "Karshakan Lens - Kuttanad Farmer Early-Warning",
+  "short_name": "Karshakan Lens",
+  "description": "Community-verified agricultural early warning system for Kuttanad paddy and duck farmers",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f2f9f1",
+  "theme_color": "#15803d",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

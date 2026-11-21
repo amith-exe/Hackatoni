@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Karshakan Lens - Kuttanad Polder Early Warning</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#15803d">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    #viewMap {
+      height: calc(100vh - 105px) !important;
+      min-height: 520px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      position: relative;
+    }
+    .map-canvas-container {
+      position: relative !important;
+      flex: 1 1 auto !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 480px !important;
+    }
+    #map {
+      position: absolute !important;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 480px !important;
+      background-color: #d1d5db;
+    }
+    #reportMapPicker {
+      height: 250px !important;
+      min-height: 250px !important;
+      width: 100% !important;
+      border-radius: 0.75rem;
+      background-color: #d1d5db;
+      z-index: 10;
+    }
+    .custom-pin {
+      display: flex; align-items: center; justify-content: center; border-radius: 50%;
+      border: 2px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      cursor: pointer; transition: transform 0.2s;
+    }
+    .custom-pin:hover { transform: scale(1.15); }
+    .pulse-danger { animation: pulse-red 2s infinite; }
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+      70% { box-shadow: 0 0 0 14px rgba(220, 38, 38, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col antialiased">
+  <!-- Top Notification & Demo User Bar -->
+  <header class="bg-white/95 backdrop-blur border-b border-emerald-100 shadow-sm sticky top-0 z-50">
+    <div class="bg-emerald-800 text-white text-xs px-3 py-1.5 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-1.5 font-medium">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>കുട്ടനാട് നെല്ല് - താറാവ് മുൻകരുതൽ നെറ്റ്‌വർക്ക്</span>
+        <span class="hidden sm:inline text-emerald-200">| Kuttanad Polder Early Warning</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 bg-emerald-900/80 px-2 py-0.5 rounded border border-emerald-700/60">
+          <span class="text-[11px] text-emerald-200">User:</span>
+          <select id="userSelector" class="bg-transparent text-white text-[11px] font-semibold focus:outline-none cursor-pointer">
+            <option value="22222222-2222-2222-2222-222222222201" class="text-gray-900">🌾 Thomas Kutty (Farmer - Pulincunnoo)</option>
+            <option value="22222222-2222-2222-2222-222222222202" class="text-gray-900">🌾 Radhakrishnan M. (Farmer - Moncompu)</option>
+            <option value="22222222-2222-2222-2222-222222222204" class="text-gray-900">🏛️ Sreedhar P. (Krishi Officer - Champakulam)</option>
+          </select>
+        </div>
+        <a href="tel:18001801551" class="hidden sm:inline text-[11px] bg-emerald-700 hover:bg-emerald-600 px-2 py-0.5 rounded transition">
+          📞 Kisan: 1800-180-1551
+        </a>
+      </div>
+    </div>
+
+    <!-- Navigation Header -->
+    <div class="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-700 to-green-500 flex items-center justify-center text-white shadow-md font-bold text-lg">
+          🛡️
+        </div>
+        <div>
+          <h1 class="font-extrabold text-gray-900 text-base leading-tight flex items-center gap-1.5">
+            <span>Karshakan Lens</span>
+            <span class="text-xs font-semibold px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded">PWA</span>
+          </h1>
+          <p class="text-[11px] text-emerald-700 font-medium">കർഷകൻ ലെൻസ് • കുട്ടനാട്</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-1 sm:gap-2">
+        <button id="navMap" onclick="switchView('map')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white shadow-sm flex items-center gap-1.5">
+          <span>🗺️ Live Map</span>
+        </button>
+        <button id="navReport" onclick="switchView('report')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-600 hover:text-emerald-800 hover:bg-emerald-50 flex items-center gap-1.5">
+          <span>📢 Report</span>
+        </button>
+        <button id="navVerify" onclick="switchView('verify')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-600 hover:text-emerald-800 hover:bg-emerald-50 flex items-center gap-1.5">
+          <span>🛡️ Verify Queue</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- VIEW 1: LIVE MAP -->
+  <div id="viewMap">
+    <!-- Telemetry Bar -->
+    <div class="bg-white/95 backdrop-blur border-b border-gray-200 px-4 py-2 z-10 shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-3 overflow-x-auto py-0.5">
+        <div class="flex items-center gap-1.5 font-bold text-gray-800">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+          <span>Reports: <b id="statReportsCount">0</b></span>
+        </div>
+        <div class="flex items-center gap-1.5 font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded-lg border border-red-200">
+          <span>🌊 Saline Ingress: <b id="statSalinityAlerts">0 Segments</b></span>
+        </div>
+        <div class="flex items-center gap-1.5 font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">
+          <span>⚠️ Outbreaks: <b id="statOutbreaksCount">0</b></span>
+        </div>
+        <div class="flex items-center gap-1.5 text-blue-900 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200">
+          <span>🌧️ Rain (24h): <b id="statRainfall">-- mm</b></span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="switchView('report')" class="flex items-center gap-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold px-3 py-1.5 rounded-xl shadow text-xs">
+          <span>+ Report Incident</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Map Container -->
+    <div class="map-canvas-container">
+      <div id="map"></div>
+
+      <!-- Demo Seed Banner -->
+      <div id="seedBanner" class="absolute top-3 left-3 right-3 sm:left-6 sm:right-auto z-[400] max-w-md bg-emerald-900/90 text-white backdrop-blur px-3 py-2 rounded-xl text-xs shadow-lg border border-emerald-700/60 flex items-start gap-2">
+        <span>ℹ️</span>
+        <div class="flex-1">
+          <span class="font-bold text-emerald-200">Kuttanad Demo Active: </span>
+          Realistic sample pins around Pulincunnoo, Moncompu, and Nedumudy are preloaded. <b>Click anywhere on the map to pin-point a new report!</b>
+        </div>
+        <button onclick="document.getElementById('seedBanner').style.display='none'" class="text-emerald-300 font-bold ml-1">✕</button>
+      </div>
+
+      <!-- Floating Pin Drop Helper -->
+      <div class="absolute top-3 right-3 z-[400] bg-white/95 backdrop-blur px-3 py-1.5 rounded-xl text-xs font-bold shadow-md border border-gray-200 text-emerald-800 hidden sm:flex items-center gap-1.5">
+        <span>📍 Click map to pin report location</span>
+      </div>
+
+      <!-- Map Legend -->
+      <div class="absolute bottom-3 left-3 z-[400] bg-white/90 backdrop-blur px-3 py-2 rounded-xl text-[11px] shadow border border-gray-200 hidden sm:flex flex-col gap-1">
+        <div class="font-bold text-gray-800 text-[10px] uppercase mb-0.5">Verification Legend</div>
+        <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span><span>Unconfirmed (0-1 confirms)</span></div>
+        <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span><span>Community Confirmed (2+ neighbors)</span></div>
+        <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span><span>Officially Verified (Krishi Bhavan)</span></div>
+        <div class="flex items-center gap-2 border-t border-gray-100 pt-1 mt-0.5"><span class="w-4 h-1 bg-red-600 rounded"></span><span>Salinity Ingress Canal</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 2: SUBMIT REPORT -->
+  <div id="viewReport" class="hidden flex-1 bg-gradient-to-b from-emerald-50/50 to-gray-50 py-4 sm:py-6 overflow-y-auto">
+    <div class="max-w-xl mx-auto p-4">
+      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div class="bg-emerald-700 text-white p-4 sm:p-5">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-xl">📢</span>
+            <h2 class="text-lg sm:text-xl font-black">Submit Incident Report</h2>
+          </div>
+          <p class="text-xs sm:text-sm text-emerald-100">
+            അടിയന്തര മുന്നറിയിപ്പ് നൽകുക • Automatically snapped to canal network
+          </p>
+        </div>
+
+        <form id="reportForm" onsubmit="handleFormSubmit(event)" class="p-4 sm:p-5 space-y-4">
+          <!-- 1. Five Clean Types -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">1. Incident Type</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button type="button" onclick="selectType('crop_disease')" id="btn_crop_disease" class="type-btn p-3 rounded-xl border text-left bg-emerald-700 text-white border-emerald-700 shadow-md">
+                <div class="font-black text-sm">🌾 Crop Disease</div>
+                <div class="text-[11px] opacity-90">തവിട്ടു ചാഴി, പോളരോഗം (BPH, Sheath Blight)</div>
+              </button>
+              <button type="button" onclick="selectType('salinity')" id="btn_salinity" class="type-btn p-3 rounded-xl border text-left bg-blue-50 text-blue-800 border-blue-200">
+                <div class="font-black text-sm">🌊 Salinity Ingress</div>
+                <div class="text-[11px] opacity-90">ഉപ്പുവെള്ള കയറ്റം (Salinity > 2.0 ppt)</div>
+              </button>
+              <button type="button" onclick="selectType('bird_deaths')" id="btn_bird_deaths" class="type-btn p-3 rounded-xl border text-left bg-rose-50 text-rose-800 border-rose-200">
+                <div class="font-black text-sm">🦆 Duck Mortality</div>
+                <div class="text-[11px] opacity-90">താറാവ് മരണം (Avian Flu Risk)</div>
+              </button>
+              <button type="button" onclick="selectType('bund_seepage')" id="btn_bund_seepage" class="type-btn p-3 rounded-xl border text-left bg-amber-50 text-amber-800 border-amber-200">
+                <div class="font-black text-sm">🧱 Bund Seepage</div>
+                <div class="text-[11px] opacity-90">പുറംബണ്ട് ചോർച്ച (Piping Breach)</div>
+              </button>
+              <button type="button" onclick="selectType('crop_loss')" id="btn_crop_loss" class="type-btn p-3 rounded-xl border text-left bg-purple-50 text-purple-800 border-purple-200 sm:col-span-2">
+                <div class="font-black text-sm">📉 Crop Loss</div>
+                <div class="text-[11px] opacity-90">വിളനാശ നഷ്ടപരിഹാര സർവേ (AIMS 72hr)</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Type Specific Inputs -->
+          <div id="dynamicInputs" class="bg-gray-50 p-3.5 rounded-xl border border-gray-200">
+            <!-- Injected dynamically -->
+          </div>
+
+          <!-- 3. Coordinates & Interactive Pin-Point Map -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1">
+                <span>📍 2. Pin-point Field Location</span>
+                <span class="text-[10px] text-emerald-700 font-semibold">(പാടശേഖര സ്ഥലം)</span>
+              </label>
+              <button type="button" onclick="locateGPS()" class="text-xs text-emerald-700 font-bold hover:underline flex items-center gap-1">
+                <span>🎯 Use My GPS</span>
+              </button>
+            </div>
+
+            <p class="text-[11px] text-gray-600 mb-2">
+              Tap anywhere on the mini-map or drag the pin to mark your exact polder / field:
+            </p>
+
+            <!-- Embedded Interactive Leaflet Mini-Map -->
+            <div class="relative w-full mb-2">
+              <div id="reportMapPicker"></div>
+              <div class="absolute top-2 right-2 z-[400] bg-white/95 backdrop-blur px-2.5 py-1 rounded-lg text-[10px] font-bold text-gray-700 shadow border border-gray-200">
+                👆 Tap to move pin
+              </div>
+            </div>
+
+            <!-- Quick Presets -->
+            <div class="flex flex-wrap gap-1.5 mb-2">
+              <button type="button" onclick="setCoords(9.446, 76.458)" class="px-2.5 py-1 bg-gray-100 hover:bg-emerald-100 rounded-lg text-xs font-semibold">🌾 Pulincunnoo</button>
+              <button type="button" onclick="setCoords(9.429, 76.439)" class="px-2.5 py-1 bg-gray-100 hover:bg-emerald-100 rounded-lg text-xs font-semibold">🌾 Moncompu</button>
+              <button type="button" onclick="setCoords(9.436, 76.404)" class="px-2.5 py-1 bg-gray-100 hover:bg-emerald-100 rounded-lg text-xs font-semibold">🌾 Nedumudy</button>
+              <button type="button" onclick="setCoords(9.476, 76.392)" class="px-2.5 py-1 bg-gray-100 hover:bg-emerald-100 rounded-lg text-xs font-semibold">🌊 Kainakary</button>
+              <button type="button" onclick="setCoords(9.420, 76.423)" class="px-2.5 py-1 bg-gray-100 hover:bg-emerald-100 rounded-lg text-xs font-semibold">🧱 Champakulam</button>
+            </div>
+
+            <!-- Coordinate numeric inputs -->
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="bg-emerald-50/60 p-2 rounded-lg border border-emerald-200">
+                <span class="text-[10px] text-emerald-800 font-bold block mb-0.5">Latitude (അക്ഷാംശം)</span>
+                <input id="inputLat" type="number" step="0.0001" value="9.446" oninput="updatePinFromInputs()" class="w-full bg-white p-1.5 border rounded font-bold text-gray-800" />
+              </div>
+              <div class="bg-emerald-50/60 p-2 rounded-lg border border-emerald-200">
+                <span class="text-[10px] text-emerald-800 font-bold block mb-0.5">Longitude (രേഖാംശം)</span>
+                <input id="inputLng" type="number" step="0.0001" value="76.458" oninput="updatePinFromInputs()" class="w-full bg-white p-1.5 border rounded font-bold text-gray-800" />
+              </div>
+            </div>
+            <p class="text-[10px] text-gray-500 mt-1 italic">
+              * System will automatically snap report to nearest Kuttanad canal segment via PostGIS ST_Distance.
+            </p>
+          </div>
+
+          <!-- 4. Photo Evidence -->
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">3. Photo Evidence</label>
+            <div class="flex gap-2">
+              <input id="inputPhoto" type="text" placeholder="Paste image URL or click Sample..." class="flex-1 p-2 border rounded-lg text-xs" />
+              <button type="button" onclick="document.getElementById('inputPhoto').value='https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b'" class="px-2.5 py-1.5 bg-gray-100 text-xs font-semibold rounded-lg">Sample</button>
+            </div>
+          </div>
+
+          <!-- 5. Notes & Sarvam Voice STT Placeholder -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-bold text-gray-700 uppercase tracking-wider">4. Field Notes</label>
+              <button type="button" onclick="triggerVoiceNote()" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                🎤 Malayalam Voice Note (Sarvam AI Phase 2)
+              </button>
+            </div>
+            <textarea id="inputNotes" rows="2" placeholder="കണ്ടത്തിൽ കണ്ട ലക്ഷണങ്ങൾ രേഖപ്പെടുത്തുക..." class="w-full p-2.5 border rounded-xl text-xs font-medium"></textarea>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" id="submitBtn" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3.5 rounded-xl text-sm shadow transition">
+            Submit & Generate Instant KAU Action Plan →
+          </button>
+        </form>
+
+        <!-- Action Card Result Display -->
+        <div id="actionCardResult" class="hidden p-5 border-t border-gray-200">
+          <!-- Dynamically populated on submit -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 3: VERIFY QUEUE -->
+  <div id="viewVerify" class="hidden flex-1 bg-gradient-to-b from-emerald-50/50 to-gray-50 py-4 sm:py-6 overflow-y-auto">
+    <div class="max-w-3xl mx-auto p-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-4 mb-4 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-black text-gray-900">🛡️ Trust Verification & Peer Review</h2>
+          <p class="text-xs text-gray-600">Neighbors confirm reports to promote them; Krishi Bhavan officers officially verify.</p>
+        </div>
+        <button onclick="loadFeed()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-bold text-gray-700">Refresh</button>
+      </div>
+
+      <div id="queueList" class="space-y-3">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentReportType = 'crop_disease';
+    let currentMap = null;
+    let mapLayers = null;
+    let globalReports = [];
+    let globalCanals = [];
+    let globalClusters = [];
+    let reportPickerMap = null;
+    let pickerMarker = null;
+    let mainMapClickMarker = null;
+
+    function initLeafletMap() {
+      if (currentMap) return;
+      const mapEl = document.getElementById('map');
+      if (!mapEl) return;
+
+      currentMap = L.map('map', { 
+        center: [9.446, 76.435], 
+        zoom: 12, 
+        zoomControl: false 
+      });
+      L.control.zoom({ position: 'bottomright' }).addTo(currentMap);
+
+      // OpenStreetMap Humanitarian (HOT) Layer (100% Free, Zero API Key Required)
+      const hotLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        subdomains: ['a', 'b', 'c'],
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | HOT'
+      });
+
+      // Esri World Street Map Layer (100% Free, Zero API Key Required)
+      const streetLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18,
+        attribution: '&copy; Esri World Street Map'
+      });
+
+      // Esri Satellite Imagery Layer (100% Free, Zero API Key Required)
+      const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 18,
+        attribution: '&copy; Esri World Imagery'
+      });
+
+      hotLayer.addTo(currentMap);
+      L.control.layers({
+        "🌾 Kuttanad Waterways (OSM HOT)": hotLayer,
+        "🗺️ Topo Street": streetLayer,
+        "🛰️ Satellite Imagery": satLayer
+      }, null, { position: 'topright' }).addTo(currentMap);
+
+      mapLayers = L.layerGroup().addTo(currentMap);
+
+      // Click on main map to pin-point report
+      currentMap.on('click', function(e) {
+        const lat = parseFloat(e.latlng.lat.toFixed(4));
+        const lng = parseFloat(e.latlng.lng.toFixed(4));
+        
+        if (mainMapClickMarker) {
+          currentMap.removeLayer(mainMapClickMarker);
+        }
+
+        const iconHtml = `<div style="background:#dc2626;color:white;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 12px rgba(220,38,38,0.9);border:2px solid white;">📍</div>`;
+        mainMapClickMarker = L.marker([lat, lng], {
+          icon: L.divIcon({
+            className: 'custom-pin pulse-danger',
+            html: iconHtml,
+            iconSize: [34, 34],
+            iconAnchor: [17, 34]
+          })
+        }).addTo(currentMap);
+
+        mainMapClickMarker.bindPopup(`
+          <div style="min-width: 190px; text-align: center; padding: 4px; font-family: system-ui, sans-serif;">
+            <div style="font-weight: 800; font-size: 13px; color: #111827; margin-bottom: 2px;">📍 Pinned Farm Location</div>
+            <div style="font-size: 11px; font-weight: 700; color: #047857; background: #ecfdf5; border-radius: 6px; padding: 2px 6px; display: inline-block; margin-bottom: 8px;">
+              Lat: ${lat}, Lng: ${lng}
+            </div>
+            <button onclick="reportAtLocation(${lat}, ${lng})" style="width: 100%; background: #15803d; color: white; border: none; font-weight: 800; font-size: 12px; padding: 8px 12px; border-radius: 8px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+              📢 Report Incident Here →
+            </button>
+          </div>
+        `).openPopup();
+      });
+
+      // Invalidate size after layout completes
+      setTimeout(() => { if (currentMap) currentMap.invalidateSize(); }, 200);
+      setTimeout(() => { if (currentMap) currentMap.invalidateSize(); }, 600);
+    }
+
+    function reportAtLocation(lat, lng) {
+      setCoords(lat, lng);
+      switchView('report');
+    }
+
+    function initReportPickerMap() {
+      const pickerEl = document.getElementById('reportMapPicker');
+      if (!pickerEl) return;
+
+      const lat = parseFloat(document.getElementById('inputLat').value) || 9.446;
+      const lng = parseFloat(document.getElementById('inputLng').value) || 76.458;
+
+      if (!reportPickerMap) {
+        reportPickerMap = L.map('reportMapPicker', {
+          center: [lat, lng],
+          zoom: 13,
+          zoomControl: true
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          subdomains: ['a', 'b', 'c'],
+          attribution: '&copy; OpenStreetMap'
+        }).addTo(reportPickerMap);
+
+        const markerHtml = `<div style="background:#15803d;color:white;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 3px 8px rgba(0,0,0,0.4);border:2px solid white;">📍</div>`;
+        pickerMarker = L.marker([lat, lng], {
+          draggable: true,
+          icon: L.divIcon({
+            className: 'custom-pin',
+            html: markerHtml,
+            iconSize: [32, 32],
+            iconAnchor: [16, 32]
+          })
+        }).addTo(reportPickerMap);
+
+        pickerMarker.on('dragend', function(e) {
+          const pos = e.target.getLatLng();
+          setCoords(pos.lat.toFixed(4), pos.lng.toFixed(4), false);
+        });
+
+        reportPickerMap.on('click', function(e) {
+          setCoords(e.latlng.lat.toFixed(4), e.latlng.lng.toFixed(4));
+        });
+      } else {
+        pickerMarker.setLatLng([lat, lng]);
+        reportPickerMap.setView([lat, lng], 13);
+      }
+
+      setTimeout(() => { if (reportPickerMap) reportPickerMap.invalidateSize(); }, 150);
+      setTimeout(() => { if (reportPickerMap) reportPickerMap.invalidateSize(); }, 450);
+    }
+
+    function updatePinFromInputs() {
+      const lat = parseFloat(document.getElementById('inputLat').value);
+      const lng = parseFloat(document.getElementById('inputLng').value);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        if (reportPickerMap && pickerMarker) {
+          pickerMarker.setLatLng([lat, lng]);
+          reportPickerMap.panTo([lat, lng]);
+        }
+      }
+    }
+
+    function setCoords(lat, lng, moveMarker = true) {
+      document.getElementById('inputLat').value = lat;
+      document.getElementById('inputLng').value = lng;
+      if (reportPickerMap && pickerMarker && moveMarker) {
+        pickerMarker.setLatLng([lat, lng]);
+        reportPickerMap.panTo([lat, lng]);
+      }
+    }
+
+    function locateGPS() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          setCoords(pos.coords.latitude.toFixed(4), pos.coords.longitude.toFixed(4));
+        }, () => setCoords(9.446, 76.458));
+      } else {
+        setCoords(9.446, 76.458);
+      }
+    }
+
+    function switchView(view) {
+      document.getElementById('viewMap').classList.add('hidden');
+      document.getElementById('viewReport').classList.add('hidden');
+      document.getElementById('viewVerify').classList.add('hidden');
+      document.getElementById('navMap').className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-gray-600 hover:bg-emerald-50';
+      document.getElementById('navReport').className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-gray-600 hover:bg-emerald-50';
+      document.getElementById('navVerify').className = 'px-3 py-1.5 rounded-lg text-xs font-bold text-gray-600 hover:bg-emerald-50';
+
+      if (view === 'map') {
+        document.getElementById('viewMap').classList.remove('hidden');
+        document.getElementById('navMap').className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white shadow-sm';
+        setTimeout(() => { if (currentMap) currentMap.invalidateSize(); }, 150);
+        setTimeout(() => { if (currentMap) currentMap.invalidateSize(); }, 500);
+      } else if (view === 'report') {
+        document.getElementById('viewReport').classList.remove('hidden');
+        document.getElementById('navReport').className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white shadow-sm';
+        setTimeout(() => { initReportPickerMap(); }, 100);
+      } else if (view === 'verify') {
+        document.getElementById('viewVerify').classList.remove('hidden');
+        document.getElementById('navVerify').className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 text-white shadow-sm';
+        renderQueue();
+      }
+    }
+
+    function selectType(t) {
+      currentReportType = t;
+      ['crop_disease', 'salinity', 'bird_deaths', 'bund_seepage', 'crop_loss'].forEach(type => {
+        const btn = document.getElementById('btn_' + type);
+        if (type === t) {
+          btn.className = 'type-btn p-3 rounded-xl border text-left bg-emerald-700 text-white border-emerald-700 shadow-md';
+        } else {
+          btn.className = 'type-btn p-3 rounded-xl border text-left bg-gray-50 text-gray-700 border-gray-200';
+        }
+      });
+      renderDynamicInputs();
+    }
+
+    function renderDynamicInputs() {
+      const container = document.getElementById('dynamicInputs');
+      if (currentReportType === 'crop_disease') {
+        container.innerHTML = `
+          <label class="block text-xs font-bold text-gray-700 mb-1">Paddy Disease Symptoms</label>
+          <select id="subDisease" class="w-full bg-white border rounded-lg p-2 text-xs font-semibold">
+            <option value="brown_planthopper">Brown Plant Hopper (BPH - തവിട്ടു ചാഴി)</option>
+            <option value="sheath_blight">Sheath Blight (പോളരോഗം)</option>
+            <option value="bacterial_leaf_blight">Bacterial Leaf Blight (ഇലകരിച്ചിൽ)</option>
+            <option value="rice_blast">Rice Blast (കുലവാട്ടം)</option>
+          </select>
+        `;
+      } else if (currentReportType === 'salinity') {
+        container.innerHTML = `
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-xs font-bold text-gray-700">Canal Salinity Reading (ppt)</label>
+            <span id="salVal" class="text-xs font-extrabold px-2 py-0.5 rounded bg-red-100 text-red-800">2.5 ppt (Critical)</span>
+          </div>
+          <input id="subSalinity" type="range" min="0.5" max="6.0" step="0.1" value="2.5" oninput="document.getElementById('salVal').innerText = this.value + ' ppt ' + (this.value >= 2.0 ? '(Danger)' : '(Watch)')" class="w-full accent-blue-600" />
+        `;
+      } else if (currentReportType === 'bird_deaths') {
+        container.innerHTML = `
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-xs font-bold text-rose-800">Dead Ducks</label>
+              <input id="subDead" type="number" value="18" min="1" class="w-full p-2 border rounded-lg text-xs font-bold" />
+            </div>
+            <div>
+              <label class="text-xs font-bold text-amber-800">Sick Ducks</label>
+              <input id="subSick" type="number" value="30" min="0" class="w-full p-2 border rounded-lg text-xs font-bold" />
+            </div>
+          </div>
+        `;
+      } else if (currentReportType === 'bund_seepage') {
+        container.innerHTML = `
+          <label class="text-xs font-bold text-amber-800 mb-1 block">Seepage Type</label>
+          <select id="subSeepage" class="w-full p-2 border rounded-lg text-xs font-semibold">
+            <option value="active_piping">Active Boiling Piping (മണൽച്ചാക്ക് അടിയന്തര ആവശ്യം)</option>
+            <option value="surface_sweat">Outer Bund Surface Wetting</option>
+          </select>
+        `;
+      } else {
+        container.innerHTML = `
+          <label class="text-xs font-bold text-gray-700 mb-1 block">Affected Area (Acres)</label>
+          <input id="subAcres" type="number" value="2.5" step="0.5" class="w-full p-2 border rounded-lg text-xs font-bold" />
+        `;
+      }
+    }
+
+    function triggerVoiceNote() {
+      document.getElementById('inputNotes').value = 'കതിരുകൾക്ക് താഴെ തവിട്ടു ചാഴി കൂട്ടത്തോടെ കാണുന്നു. ഇലകൾ മഞ്ഞളിക്കുന്നുണ്ട്.';
+    }
+
+    async function loadFeed() {
+      try {
+        const res = await fetch('/api/map-feed');
+        const data = await res.json();
+        globalReports = data.reports;
+        globalCanals = data.affected_canals;
+        globalClusters = data.active_clusters;
+
+        // Update stats
+        document.getElementById('statReportsCount').innerText = globalReports.length;
+        const dangerCanals = globalCanals.filter(c => c.current_alert_level === 'Danger').length;
+        document.getElementById('statSalinityAlerts').innerText = dangerCanals > 0 ? dangerCanals + ' Danger' : globalCanals.length + ' Segments';
+        document.getElementById('statOutbreaksCount').innerText = globalClusters.length;
+        if (data.rainfall_summary) {
+          document.getElementById('statRainfall').innerText = data.rainfall_summary.total_rain_24h_mm + ' mm';
+        }
+
+        renderMapLayers();
+        renderQueue();
+        setTimeout(() => { if (currentMap) currentMap.invalidateSize(); }, 200);
+      } catch (e) {
+        console.error('Failed to load map feed', e);
+      }
+    }
+
+    function renderMapLayers() {
+      if (!currentMap || !mapLayers) return;
+      mapLayers.clearLayers();
+
+      // Canals
+      globalCanals.forEach(c => {
+        const coords = c.coordinates.map(([lng, lat]) => [lat, lng]);
+        let color = '#0284c7';
+        let weight = 4;
+        if (c.current_alert_level === 'Danger') { color = '#dc2626'; weight = 6; }
+        else if (c.current_alert_level === 'Warning') { color = '#f97316'; weight = 5; }
+
+        const poly = L.polyline(coords, { color, weight, opacity: 0.85 }).addTo(mapLayers);
+        poly.bindPopup(`<b>🌊 ${c.name}</b><br>Salinity: ${c.salinity_ppt ? c.salinity_ppt + ' ppt' : 'Normal'}<br>${c.alert_reason || ''}`);
+      });
+
+      // Clusters
+      globalClusters.forEach(cl => {
+        const circle = L.circle([cl.center_latitude, cl.center_longitude], {
+          color: cl.alert_level === 'Danger' ? '#dc2626' : '#d97706',
+          fillColor: cl.alert_level === 'Danger' ? '#ef4444' : '#f59e0b',
+          fillOpacity: 0.22,
+          radius: (cl.radius_km || 2.0) * 1000
+        }).addTo(mapLayers);
+        circle.bindPopup(`<b>⚠️ ${cl.alert_level} Outbreak Cluster</b><br>${cl.report_count} reports within ${cl.radius_km} km`);
+      });
+
+      // Report Pins
+      globalReports.forEach(r => {
+        let pinBg = '#f59e0b';
+        if (r.verification_status === 'community_confirmed') pinBg = '#2563eb';
+        if (r.verification_status === 'officially_verified') pinBg = '#16a34a';
+
+        let symbol = '⚠️';
+        if (r.report_type === 'crop_disease') symbol = '🌾';
+        if (r.report_type === 'salinity') symbol = '🌊';
+        if (r.report_type === 'bird_deaths') symbol = '🦆';
+        if (r.report_type === 'bund_seepage') symbol = '🧱';
+
+        const icon = L.divIcon({
+          className: '',
+          html: `<div style="width:34px;height:34px;border-radius:50%;background:${pinBg};display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 4px 6px rgba(0,0,0,0.3);font-size:16px;">${symbol}</div>`,
+          iconSize: [34, 34],
+          iconAnchor: [17, 17]
+        });
+
+        const marker = L.marker([r.latitude, r.longitude], { icon }).addTo(mapLayers);
+        marker.bindPopup(`<b>${r.report_type.replace('_', ' ').toUpperCase()}</b><br>Status: <b>${r.verification_status}</b><br>Confirmations: ${r.confirmations_count}<br>${r.notes_text ? '<i>"' + r.notes_text + '"</i>' : ''}`);
+      });
+    }
+
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      const reporterId = document.getElementById('userSelector').value;
+      const lat = parseFloat(document.getElementById('inputLat').value);
+      const lng = parseFloat(document.getElementById('inputLng').value);
+      const photoUrl = document.getElementById('inputPhoto').value;
+      const notesText = document.getElementById('inputNotes').value;
+
+      let details = {};
+      if (currentReportType === 'crop_disease') {
+        details.disease_code = document.getElementById('subDisease').value;
+        details.confidence = photoUrl.includes('uncertain') ? 0.52 : 0.94;
+      } else if (currentReportType === 'salinity') {
+        details.salinity_ppt = parseFloat(document.getElementById('subSalinity').value);
+      } else if (currentReportType === 'bird_deaths') {
+        details.dead_count = parseInt(document.getElementById('subDead').value);
+        details.sick_count = parseInt(document.getElementById('subSick').value);
+      } else if (currentReportType === 'bund_seepage') {
+        details.seepage_type = document.getElementById('subSeepage').value;
+      } else {
+        details.affected_area_acres = parseFloat(document.getElementById('subAcres').value);
+      }
+
+      document.getElementById('submitBtn').innerText = 'Submitting & Routing...';
+      try {
+        const res = await fetch('/api/reports', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reporter_id: reporterId,
+            report_type: currentReportType,
+            latitude: lat,
+            longitude: lng,
+            photo_url: photoUrl || undefined,
+            notes_text: notesText || undefined,
+            details
+          })
+        });
+        const rep = await res.json();
+        document.getElementById('submitBtn').innerText = 'Submit & Generate Instant KAU Action Plan →';
+
+        // Render Action Card
+        if (rep.action_guidance) {
+          const g = rep.action_guidance;
+          const cardHtml = `
+            <div class="rounded-2xl overflow-hidden border border-emerald-200 shadow-xl">
+              <div class="p-4 ${g.alert_level === 'Danger' ? 'bg-red-700' : 'bg-emerald-700'} text-white">
+                <span class="text-xs font-black uppercase px-2 py-0.5 rounded bg-white/20">${g.alert_level} Protocol</span>
+                <h3 class="text-lg font-black mt-1">${g.title}</h3>
+                <p class="text-xs text-white/90 font-medium">${g.title_ml}</p>
+              </div>
+              <div class="p-4 bg-white space-y-3 text-xs">
+                <p class="p-2.5 bg-gray-50 rounded-lg text-gray-800 font-medium">${g.summary}</p>
+                <div>
+                  <h4 class="font-bold text-gray-900 uppercase text-[11px] mb-1.5">Action Steps:</h4>
+                  <ul class="space-y-1.5 text-gray-700">
+                    ${g.bullet_points.map((pt, i) => `<li class="flex gap-2"><b>${i+1}.</b><span>${pt}</span></li>`).join('')}
+                  </ul>
+                </div>
+                ${g.citation ? `<p class="text-[10px] text-gray-500 bg-gray-50 p-2 rounded"><b>Citation:</b> ${g.citation}</p>` : ''}
+                <button onclick="switchView('map')" class="w-full bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-center">View On Live Map →</button>
+              </div>
+            </div>
+          `;
+          const resultDiv = document.getElementById('actionCardResult');
+          resultDiv.innerHTML = cardHtml;
+          resultDiv.classList.remove('hidden');
+          resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+        loadFeed();
+      } catch (err) {
+        alert('Submission failed: ' + err.message);
+        document.getElementById('submitBtn').innerText = 'Submit & Generate Instant KAU Action Plan →';
+      }
+    }
+
+    function renderQueue() {
+      const container = document.getElementById('queueList');
+      if (!container) return;
+      const currentUserRole = document.getElementById('userSelector').value === '22222222-2222-2222-2222-222222222204' ? 'officer' : 'farmer';
+
+      container.innerHTML = globalReports.map(r => {
+        return `
+          <div class="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-bold text-sm capitalize">${r.report_type.replace('_', ' ')}</span>
+                <span class="px-2 py-0.5 rounded-full font-bold text-[10px] ${r.verification_status === 'officially_verified' ? 'bg-emerald-100 text-emerald-800' : (r.verification_status === 'community_confirmed' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800')}">${r.verification_status}</span>
+              </div>
+              <div class="text-gray-500 text-[11px]">Canal: <b>${r.canal_name || 'Nearest Canal'}</b> | Confirmations: <b>${r.confirmations_count}</b></div>
+              ${r.notes_text ? `<div class="italic text-gray-700 mt-1">"${r.notes_text}"</div>` : ''}
+            </div>
+            <div class="flex items-center gap-2">
+              ${currentUserRole === 'farmer' && r.verification_status !== 'officially_verified' ? `
+                <button onclick="doConfirm('${r.id}')" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs">Confirm Report</button>
+              ` : ''}
+              ${currentUserRole === 'officer' ? `
+                <button onclick="doVerify('${r.id}', 'officially_verified')" class="px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-xl text-xs">Officially Verify</button>
+                <button onclick="doVerify('${r.id}', 'rejected')" class="px-2.5 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl text-xs">Reject</button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function doConfirm(reportId) {
+      const confirmerId = document.getElementById('userSelector').value;
+      try {
+        const res = await fetch('/api/reports/' + reportId + '/confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ confirmer_id: confirmerId })
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          alert('Notice: ' + err.detail);
+        } else {
+          alert('Report confirmed! At 2 confirmations, it promotes to Community Confirmed.');
+          loadFeed();
+        }
+      } catch (e) {
+        alert('Error: ' + e.message);
+      }
+    }
+
+    async function doVerify(reportId, status) {
+      const officerId = document.getElementById('userSelector').value;
+      try {
+        const res = await fetch('/api/reports/' + reportId + '/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ officer_id: officerId, status, notes: 'Verified by Krishi Officer' })
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          alert('Error: ' + err.detail);
+        } else {
+          alert('Report officially updated to: ' + status);
+          loadFeed();
+        }
+      } catch (e) {
+        alert('Error: ' + e.message);
+      }
+    }
+
+    // Init on load and resize
+    window.addEventListener('DOMContentLoaded', () => {
+      initLeafletMap();
+      renderDynamicInputs();
+      loadFeed();
+      document.getElementById('userSelector').addEventListener('change', () => {
+        renderQueue();
+      });
+      window.addEventListener('resize', () => {
+        if (currentMap) currentMap.invalidateSize();
+        if (reportPickerMap) reportPickerMap.invalidateSize();
+      });
+    });
+  </script>
+</body>
+</html>
