@@ -170,7 +170,8 @@ Place final screenshots in `docs/screenshots/` using the filenames below. These 
 ### 1. Live Map and outbreak overview
 
 <!-- Screenshot placeholder: Live Map showing Kuttanad pins, canals, DBSCAN circles, telemetry, and the “Show All Data” control. -->
-![Live Map and outbreak overview](docs/screenshots/01-live-map-overview.png)
+<img width="1535" height="751" alt="image" src="https://github.com/user-attachments/assets/24c7ca99-e10c-4e48-aa65-9bae32c12076" />
+
 
 ### 2. Filters and visible-layer controls
 
