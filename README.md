@@ -274,3 +274,46 @@ These create the six core tables, spatial indexes, canal seed graph, KAU remedie
 9. Finish with the salinity story: the alert propagates along connected canals and uses rainfall dilution rather than a misleading point-radius alert.
 
 **Core thesis:** PadamGuardian connects place, people, and practical agronomy before a local warning becomes a regional loss.
+
+## Mermaid Use-Case Diagram
+
+```mermaid
+flowchart LR
+  Farmer((Paddy farmer))
+  Neighbor((Neighboring farmer))
+  Officer((Krishi Bhavan officer))
+  Gemini((Gemini Vision))
+  Weather((Open-Meteo))
+  KAU((KAU remedy registry))
+
+  subgraph Platform[PadamGuardian / Karshakan Lens]
+    Map[View Live Map]
+    Filter[Filter reports and threats]
+    Scan[Scan rice leaf]
+    Report[Submit incident]
+    Trend[Run DBSCAN trend]
+    Confirm[Confirm neighbor report]
+    Verify[Verify or reject report]
+    Alert[Receive salinity and outbreak alerts]
+    Action[View safe action plan]
+  end
+
+  Farmer --> Map
+  Farmer --> Scan
+  Farmer --> Report
+  Farmer --> Trend
+  Farmer --> Alert
+  Neighbor --> Confirm
+  Neighbor --> Alert
+  Officer --> Filter
+  Officer --> Trend
+  Officer --> Verify
+  Scan --> Gemini
+  Scan --> Action
+  Gemini --> KAU
+  Report --> Map
+  Map --> Filter
+  Trend --> Action
+  Weather --> Map
+  Verify --> Alert
+```
