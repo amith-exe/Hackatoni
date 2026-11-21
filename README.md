@@ -98,52 +98,59 @@ DBSCAN (Density-Based Spatial Clustering of Applications with Noise) uses geogra
 
 ## Complete Report and Trust Lifecycle
 
-```text
-Map click / GPS / Leaf Scan / future Malayalam voice note
-                         |
-                         v
-              POST /api/reports or /api/vision/diagnose
-                         |
-                         v
-      nearest canal snap: Haversine/PostGIS ST_Distance equivalent
-                         |
-       +-----------------+-------------------+-----------------+
-       |                 |                   |                 |
- Crop Disease        Salinity          Duck deaths       Bund / loss
-       |                 |                   |                 |
- Gemini + KAU       Open-Meteo +      deterministic     safety/AIMS
- remedy + DBSCAN    upstream graph     biosecurity       checklists
-       +-----------------+-------------------+-----------------+
-                         |
-                         v
-       public responses strip reporter_id, names, and phone numbers
-                         |
-                    unconfirmed
-                         |
-          2+ unique peer confirmations
-                         |
-                 community_confirmed
-                         |
-          officer: officially_verified / rejected
+```mermaid
+flowchart TD
+  Input[Map click / GPS / Leaf Scan / future Malayalam voice note] --> API[POST /api/reports or /api/vision/diagnose]
+  API --> Snap[Nearest canal snap\nHaversine / PostGIS ST_Distance equivalent]
+  Snap --> Branch{Incident branch}
+  Branch --> Disease[Crop Disease\nGemini + KAU remedy + DBSCAN]
+  Branch --> Salinity[Salinity\nOpen-Meteo + upstream canal graph]
+  Branch --> Duck[Duck deaths\nDeterministic biosecurity rules]
+  Branch --> Other[Bund / Crop Loss\nSafety and AIMS checklists]
+  Disease --> Public[Anonymized public response\nreporter_id, names, phone stripped]
+  Salinity --> Public
+  Duck --> Public
+  Other --> Public
+  Public --> Unconfirmed[unconfirmed]
+  Unconfirmed --> Confirmed[community_confirmed\nafter 2+ unique peer confirmations]
+  Confirmed --> Officer{Officer decision}
+  Unconfirmed --> Officer
+  Officer --> Verified[officially_verified]
+  Officer --> Rejected[rejected]
 ```
 
 ## System Architecture
 
-```text
-Next.js 14 PWA / TypeScript / Tailwind
-  Leaflet + OSM HOT + Esri Satellite + lucide-react + EN/ML
-  Live Map | Leaf Scan | Report | Verify Queue | Alerts
-                         |
-                         | REST /api
-                         v
-FastAPI backend
-  report branching and trust state machine
-  Gemini Vision router and KAU remedy lookup
-  Haversine DBSCAN engine
-  canal graph + Open-Meteo rainfall router
-                         |
-                         v
-PostgreSQL + PostGIS migrations / local in-memory repository
+```mermaid
+flowchart LR
+  subgraph Frontend[Next.js 14 PWA]
+    UI[TypeScript + Tailwind + lucide-react\nEN / ML translation]
+    Map[Leaflet\nOSM HOT / OSM / Esri Satellite]
+    Views[Live Map | Leaf Scan | Report\nVerify Queue | Alerts]
+    UI --> Map
+    UI --> Views
+  end
+  subgraph Backend[FastAPI REST Backend]
+    API[REST /api]
+    Trust[Report branching\nTrust state machine]
+    Gemini[Gemini Vision router\nKAU remedy lookup]
+    DBSCAN[Haversine DBSCAN engine]
+    Canal[Canal graph + Open-Meteo router]
+    API --> Trust
+    API --> Gemini
+    API --> DBSCAN
+    API --> Canal
+  end
+  subgraph Data[Data layer]
+    Runtime[(InMemoryDatabase\ncurrent demo runtime)]
+    PostGIS[(PostgreSQL + PostGIS\nSupabase migrations / production target)]
+  end
+  Frontend -->|JSON REST| API
+  Trust --> Runtime
+  Gemini --> Runtime
+  DBSCAN --> Runtime
+  Canal --> Runtime
+  PostGIS -. schema and seed target .-> Runtime
 ```
 
 The running demo currently uses `InMemoryDatabase` in `backend/app/services/db.py`, seeded at startup. The SQL migrations describe the production PostGIS design; a live Supabase/Postgres repository is not yet connected to the FastAPI runtime.
