@@ -76,6 +76,28 @@ export interface MapFeedData {
   active_clusters: ClusterItem[];
   affected_canals: CanalSegment[];
   rainfall_summary?: RainfallSummary;
+  outbreak_breakdown: OutbreakBreakdown[];
+}
+
+export interface OutbreakBreakdown {
+  disease_code?: string;
+  threat_code?: string;
+  label: string;
+  current_7d_count: number;
+  previous_7d_count: number;
+  growth_pct: number;
+  spread_status: 'spreading' | 'active_cluster' | 'watch' | 'isolated';
+  cluster_count: number;
+  center?: { lat: number; lng: number };
+  affected_areas: string[];
+}
+
+export interface TrendAnalysis {
+  selected_location: { lat: number; lng: number };
+  dbscan_summary: { clusters_found: number; clustered_reports_count: number; noise_reports_count: number; eps_km: number; radius_km: number };
+  spreading_diseases: Array<{ disease_code: string; label: string; distance_km: number; current_count: number; previous_count: number; trend_label: string; percentage_change: number; cluster_center?: { lat: number; lng: number }; action_summary?: string[] }>;
+  canal_salinity_status: { status: string; salinity_ppt: number; canal_name?: string; distance_km: number };
+  recommended_actions: string[];
 }
 
 export interface AlertItem {

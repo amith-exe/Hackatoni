@@ -23,9 +23,10 @@ import {
   FilePlus2,
 } from 'lucide-react';
 import { fetchMapFeed } from '@/lib/api';
-import { MapFeedData, ReportItem } from '@/types';
+import { MapFeedData, ReportItem, TrendAnalysis } from '@/types';
 import { useDemoUser } from '@/lib/demo-user';
 import LocalTrendCard from '@/components/Map/LocalTrendCard';
+import ThreatTracker from '@/components/Map/ThreatTracker';
 
 // Dynamic import with SSR disabled for Leaflet Map
 const KuttanadMap = dynamic(() => import('@/components/Map/KuttanadMap'), {
@@ -48,9 +49,12 @@ function HomeContent() {
   const [error, setError] = useState<string | null>(null);
   const [showTrendPanel, setShowTrendPanel] = useState<boolean>(true);
   const [selectedPinLocation, setSelectedPinLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [filters, setFilters] = useState<Record<string, string | number>>({ verification_status: 'all', days: 14 });
+  const [visibleLayers, setVisibleLayers] = useState({ reports: true, clusters: true, canals: true });
+  const [analysis, setAnalysis] = useState<TrendAnalysis | null>(null);
 
   useEffect(() => {
-    fetchMapFeed()
+    fetchMapFeed(filters)
       .then((feed) => {
         setData(feed);
         setLoading(false);
@@ -59,7 +63,7 @@ function HomeContent() {
         setError(err.message);
         setLoading(false);
       });
-  }, []);
+  }, [filters]);
 
   // Pre-select location if url has lat/lng
   useEffect(() => {
@@ -77,6 +81,18 @@ function HomeContent() {
     data?.affected_canals.filter((c) => c.current_alert_level === 'Danger').length || 0;
   const warningCanalsCount =
     data?.affected_canals.filter((c) => c.current_alert_level === 'Warning').length || 0;
+
+  const cutoff = Date.now() - Number(filters.days || 14) * 86400000;
+  const mapReports = (data?.reports || []).filter((r) => {
+    if (new Date(r.created_at).getTime() < cutoff) return false;
+    if (filters.report_type && r.report_type !== filters.report_type) return false;
+    if (filters.disease_code && r.details?.disease_code !== filters.disease_code) return false;
+    if (filters.verification_status === 'unconfirmed' && r.verification_status !== 'unconfirmed') return false;
+    if (filters.verification_status === 'verified_only' && !['community_confirmed','officially_verified'].includes(r.verification_status)) return false;
+    return true;
+  });
+  const mapClusters = filters.report_type && filters.report_type !== 'crop_disease' ? [] : (data?.active_clusters || []).filter((c) => !filters.disease_code || c.sub_category === filters.disease_code);
+  const mapCanals = filters.report_type && filters.report_type !== 'salinity' ? [] : (data?.affected_canals || []);
 
   const getReportTypeIcon = (type: string) => {
     if (type === 'crop_disease') return <Sprout className="w-4 h-4 text-emerald-400" />;
@@ -142,7 +158,7 @@ function HomeContent() {
             }`}
           >
             <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-700" />
-            <span>{t('localTrendTitle')}</span>
+            <span>Filters &amp; Find Trend</span>
           </button>
 
           <Link
@@ -159,9 +175,12 @@ function HomeContent() {
       <div className="relative flex-1 w-full h-full">
         {data && (
           <KuttanadMap
-            reports={data.reports}
-            canals={data.affected_canals}
-            clusters={data.active_clusters}
+            reports={mapReports}
+            canals={mapCanals}
+            clusters={mapClusters}
+            visibleLayers={visibleLayers}
+            trendLocation={analysis?.selected_location || null}
+            trendCenters={(analysis?.spreading_diseases || []).filter((d) => d.cluster_center).map((d) => d.cluster_center!)}
             onSelectReport={(report) => setSelectedReport(report)}
             selectedLocation={selectedPinLocation}
             onLocationSelect={(lat, lng) => setSelectedPinLocation({ lat, lng })}
@@ -171,9 +190,15 @@ function HomeContent() {
         {/* Floating Local Trend Panel */}
         {showTrendPanel && (
           <div className="absolute top-16 left-3 sm:left-4 z-[410] w-[calc(100%-24px)] sm:w-96 max-h-[calc(100%-80px)] overflow-y-auto no-scrollbar animate-in fade-in slide-in-from-top-2">
-            <LocalTrendCard
-              selectedLocation={selectedPinLocation}
-              onLocationChange={(lat, lng) => setSelectedPinLocation({ lat, lng })}
+            <ThreatTracker
+              breakdown={data?.outbreak_breakdown || []}
+              location={selectedPinLocation}
+              onLocationChange={(location) => setSelectedPinLocation(location)}
+              onFiltersChange={(next) => setFilters(Object.fromEntries(Object.entries(next).filter(([, value]) => value !== undefined)))}
+              onDiseaseSelect={(code) => setFilters((current) => ({ ...current, report_type: 'crop_disease', disease_code: code }))}
+              visibleLayers={visibleLayers}
+              onVisibleLayersChange={setVisibleLayers}
+              onAnalysis={setAnalysis}
             />
           </div>
         )}

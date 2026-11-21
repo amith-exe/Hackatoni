@@ -29,6 +29,9 @@ interface KuttanadMapProps {
   interactivePinPicker?: boolean;
   selectedLocation?: { lat: number; lng: number } | null;
   onLocationSelect?: (lat: number, lng: number) => void;
+  visibleLayers?: { reports: boolean; clusters: boolean; canals: boolean };
+  trendLocation?: { lat: number; lng: number } | null;
+  trendCenters?: Array<{ lat: number; lng: number }>;
 }
 
 export default function KuttanadMap({
@@ -40,6 +43,9 @@ export default function KuttanadMap({
   interactivePinPicker = false,
   selectedLocation = null,
   onLocationSelect,
+  visibleLayers = { reports: true, clusters: true, canals: true },
+  trendLocation = null,
+  trendCenters = [],
 }: KuttanadMapProps) {
   const router = useRouter();
   const { t, language } = useDemoUser();
@@ -148,6 +154,10 @@ export default function KuttanadMap({
     };
   }, []);
 
+  useEffect(() => {
+    if (selectedLocation) setDroppedPin(selectedLocation);
+  }, [selectedLocation]);
+
   // Handle Base Layer Switching
   const switchBaseLayer = (layerKey: 'waterways' | 'topo' | 'satellite') => {
     if (!mapInstanceRef.current) return;
@@ -175,7 +185,7 @@ export default function KuttanadMap({
       group.clearLayers();
 
       // 1. Draw Canal Network (LineStrings)
-      canals.forEach((canal) => {
+      if (visibleLayers.canals) canals.forEach((canal) => {
         const latLngs = canal.coordinates.map(([lng, lat]) => [lat, lng]);
 
         let color = '#0284c7'; // default water blue
@@ -221,8 +231,13 @@ export default function KuttanadMap({
         polyline.addTo(group);
       });
 
+      if (trendLocation) {
+        L.circle([trendLocation.lat, trendLocation.lng], { radius: 3000, color: '#2563eb', fillColor: '#60a5fa', fillOpacity: 0.08, dashArray: '8, 8', weight: 2 }).addTo(group);
+        trendCenters.forEach((center) => L.circle([center.lat, center.lng], { radius: 350, color: '#7c3aed', fillColor: '#a78bfa', fillOpacity: 0.28, weight: 3 }).addTo(group));
+      }
+
       // 2. Draw DBSCAN Cluster Circles
-      clusters.forEach((cluster) => {
+      if (visibleLayers.clusters) clusters.forEach((cluster) => {
         let fillColor = '#f59e0b';
         let strokeColor = '#b45309';
 
@@ -260,7 +275,7 @@ export default function KuttanadMap({
       });
 
       // 3. Draw Report Pins (Crisp SVG Markers with Zero Emojis)
-      const filtered = reports.filter((r) => filterType === 'all' || r.report_type === filterType);
+      const filtered = visibleLayers.reports ? reports.filter((r) => filterType === 'all' || r.report_type === filterType) : [];
 
       filtered.forEach((report) => {
         let pinBg = '#f59e0b'; // Amber for unconfirmed
@@ -383,7 +398,11 @@ export default function KuttanadMap({
     }
 
     updateLayers();
-  }, [reports, canals, clusters, filterType, droppedPin, onSelectReport]);
+  }, [reports, canals, clusters, filterType, droppedPin, onSelectReport, visibleLayers, trendLocation, trendCenters]);
+
+  useEffect(() => {
+    if (mapInstanceRef.current && trendLocation) mapInstanceRef.current.setView([trendLocation.lat, trendLocation.lng], 13, { animate: true });
+  }, [trendLocation]);
 
   const handleClearPin = () => {
     setDroppedPin(null);

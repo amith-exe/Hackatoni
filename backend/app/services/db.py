@@ -368,6 +368,22 @@ class InMemoryDatabase:
                         {"sick_count": 5, "dead_count": 8, "symptoms": ["hypothermia"], "flock_size": 500, "veterinary_notified": True},
                         VerificationStatus.officially_verified, 3, 12, 0)
 
+        r21 = make_rep(21, p1_id, ReportType.crop_disease, 9.4470, 76.4560, c3_id,
+                       "Sheath rot symptoms around the flag leaf sheath in Pulincunnoo.", {"disease_code": "sheath_rot", "confidence": 0.84, "severity": "medium"}, VerificationStatus.community_confirmed, 2, 2, 8)
+        r22 = make_rep(22, p2_id, ReportType.crop_disease, 9.4310, 76.4370, c4_id,
+                       "Brown leaf spot spreading in a humid Moncompu block.", {"disease_code": "brown_leaf_spot", "confidence": 0.82, "severity": "medium"}, VerificationStatus.unconfirmed, 1, 3, 4)
+        r23 = make_rep(23, p6_id, ReportType.crop_disease, 9.4230, 76.4770, c7_id,
+                       "Yellowing and hopper-vector symptoms suggest rice tungro.", {"disease_code": "rice_tungro", "confidence": 0.81, "severity": "high"}, VerificationStatus.community_confirmed, 2, 1, 6)
+        r24 = make_rep(24, p7_id, ReportType.crop_disease, 9.4670, 76.4670, c8_id,
+                       "Rice blast lesions noted near Kavalam northern polder.", {"disease_code": "rice_blast", "confidence": 0.88, "severity": "medium"}, VerificationStatus.unconfirmed, 0, 6, 3)
+
+        r25 = make_rep(25, p1_id, ReportType.crop_disease, 9.4455, 76.4570, c3_id, "Dead hearts indicate rice stem borer in Pulincunnoo.", {"disease_code": "rice_stem_borer", "confidence": 0.82, "severity": "medium"}, VerificationStatus.community_confirmed, 2, 2, 2)
+        r26 = make_rep(26, p2_id, ReportType.crop_disease, 9.4300, 76.4380, c4_id, "Folded leaves and larvae found along Moncompu bunds.", {"disease_code": "rice_leaf_folder", "confidence": 0.82, "severity": "medium"}, VerificationStatus.unconfirmed, 1, 4, 1)
+        r27 = make_rep(27, p3_id, ReportType.crop_disease, 9.4350, 76.4140, c5_id, "Smut balls observed at panicle emergence near Nedumudy.", {"disease_code": "false_smut", "confidence": 0.80, "severity": "medium"}, VerificationStatus.community_confirmed, 2, 5, 2)
+        r28 = make_rep(28, p5_id, ReportType.crop_disease, 9.4780, 76.3940, c1_id, "Rice hispa scraping seen on young leaves at Kainakary.", {"disease_code": "rice_hispa", "confidence": 0.81, "severity": "low"}, VerificationStatus.unconfirmed, 0, 7, 3)
+        r29 = make_rep(29, p6_id, ReportType.crop_disease, 9.4220, 76.4770, c7_id, "Grain discoloration noted after persistent wet weather.", {"disease_code": "grain_discoloration", "confidence": 0.80, "severity": "medium"}, VerificationStatus.community_confirmed, 2, 3, 5)
+        r30 = make_rep(30, p7_id, ReportType.crop_disease, 9.4680, 76.4680, c8_id, "Gall midge silver shoots found in Kavalam.", {"disease_code": "rice_gall_midge", "confidence": 0.81, "severity": "medium"}, VerificationStatus.unconfirmed, 1, 6, 1)
+
         # 4. Seed Confirmations
         self.confirmations = {
             uuid4(): {"report_id": r01, "confirmer_id": p2_id, "created_at": now - timedelta(days=1, hours=20)},

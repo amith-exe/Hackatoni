@@ -153,6 +153,15 @@ VALUES
     )
 ON CONFLICT (id) DO NOTHING;
 
+-- Additional disease diversity for multi-location DBSCAN demos (all sample records).
+INSERT INTO reports (id, reporter_id, report_type, location, canal_segment_id, flow_direction, notes_text, details, verification_status, confirmations_count, created_at)
+VALUES
+('33333333-3333-3333-3333-333333333321','22222222-2222-2222-2222-222222222201','crop_disease',ST_GeogFromText('SRID=4326;POINT(76.4560 9.4470)'),'11111111-1111-1111-1111-111111111103','inland','Sheath rot symptoms around the flag leaf sheath.','{"disease_code":"sheath_rot","confidence":0.84,"is_sample":true}'::jsonb,'community_confirmed',2,NOW()-INTERVAL '2 days'),
+('33333333-3333-3333-3333-333333333322','22222222-2222-2222-2222-222222222202','crop_disease',ST_GeogFromText('SRID=4326;POINT(76.4370 9.4310)'),'11111111-1111-1111-1111-111111111104','inland','Brown leaf spot spreading in a humid block.','{"disease_code":"brown_leaf_spot","confidence":0.82,"is_sample":true}'::jsonb,'unconfirmed',1,NOW()-INTERVAL '3 days'),
+('33333333-3333-3333-3333-333333333323','22222222-2222-2222-2222-222222222206','crop_disease',ST_GeogFromText('SRID=4326;POINT(76.4770 9.4230)'),'11111111-1111-1111-1111-111111111107','inland','Yellowing and hopper-vector symptoms suggest rice tungro.','{"disease_code":"rice_tungro","confidence":0.81,"is_sample":true}'::jsonb,'community_confirmed',2,NOW()-INTERVAL '1 day'),
+('33333333-3333-3333-3333-333333333324','22222222-2222-2222-2222-222222222207','crop_disease',ST_GeogFromText('SRID=4326;POINT(76.4670 9.4670)'),'11111111-1111-1111-1111-111111111108','inland','Rice blast lesions near Kavalam northern polder.','{"disease_code":"rice_blast","confidence":0.88,"is_sample":true}'::jsonb,'unconfirmed',0,NOW()-INTERVAL '6 days')
+ON CONFLICT (id) DO NOTHING;
+
 -- 3. Curated KAU Remedies Lookup
 INSERT INTO remedies_kau (disease_code, disease_name_en, disease_name_ml, immediate_actions, spray_guidance, source_citation, last_checked)
 VALUES
@@ -192,6 +201,16 @@ VALUES
         'KAU Agricultural Guide (2024)',
         CURRENT_DATE
     )
+ON CONFLICT (disease_code) DO NOTHING;
+
+INSERT INTO remedies_kau (disease_code, disease_name_en, disease_name_ml, immediate_actions, spray_guidance, source_citation, last_checked)
+VALUES
+('rice_stem_borer','Rice Stem Borer','നെല്ലിലെ തണ്ട് തുരപ്പൻ','["Remove dead hearts and destroy infested tillers.","Use light traps and conserve parasitoids.","Avoid excess nitrogen."]','KAU Package of Practices: use integrated pest management and contact Krishi Bhavan for the current approved treatment.','KAU Package of Practices / Moncompu Rice Research Station',CURRENT_DATE),
+('rice_leaf_folder','Rice Leaf Folder','നെല്ലിലെ ഇലചുരുട്ടിപ്പുഴു','["Remove folded leaves and larvae where practical.","Avoid unnecessary broad-spectrum sprays.","Scout bunds and crop edges."]','KAU Package of Practices: conserve natural enemies and consult Krishi Bhavan before any approved intervention.','KAU Package of Practices / Moncompu Rice Research Station',CURRENT_DATE),
+('rice_gall_midge','Rice Gall Midge','നെല്ലിലെ കതിര്‍ ഈച്ച','["Remove silver shoots and volunteer rice.","Synchronize planting locally.","Use recommended resistant varieties."]','KAU Package of Practices: use resistant varieties and integrated vector management; confirm treatment with Krishi Bhavan.','KAU Package of Practices / Moncompu Rice Research Station',CURRENT_DATE),
+('rice_hispa','Rice Hispa','നെല്ലിലെ ഹിസ്പ','["Remove heavily damaged leaves.","Avoid excess nitrogen.","Monitor nursery beds twice weekly."]','KAU Package of Practices: start with field sanitation and natural-enemy conservation; seek a current approved recommendation.','KAU Package of Practices / Moncompu Rice Research Station',CURRENT_DATE),
+('false_smut','False Smut','കതിരിലെ കള്ളക്കരി','["Remove smut balls before spore release.","Avoid excessive nitrogen at booting.","Maintain seed and field sanitation."]','KAU Package of Practices: use clean seed and verified integrated disease management; consult Moncompu RRS.','KAU Package of Practices / Moncompu Rice Research Station',CURRENT_DATE),
+('grain_discoloration','Grain Discoloration','നെല്ലുമണിയുടെ നിറവ്യത്യാസം','["Harvest at proper maturity.","Dry grain quickly.","Use clean seed and remove infected residues."]','KAU Package of Practices: use clean seed and post-harvest hygiene; request a current approved recommendation if pressure rises.','KAU Package of Practices / Moncompu Rice Research Station',CURRENT_DATE)
 ON CONFLICT (disease_code) DO NOTHING;
 
 -- 4. Insert 20 Realistic Seed Reports (Last 14 Days)

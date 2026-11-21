@@ -1,15 +1,22 @@
 // frontend/src/lib/api.ts
-import { MapFeedData, ReportItem, UserProfile, AlertItem, LocalTrendData } from '@/types';
+import { MapFeedData, ReportItem, UserProfile, AlertItem, LocalTrendData, TrendAnalysis } from '@/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL 
   ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`
   : '/api';
 
-export async function fetchMapFeed(): Promise<MapFeedData> {
-  const res = await fetch(`${API_BASE}/map-feed`, { cache: 'no-store' });
+export async function fetchMapFeed(filters?: Record<string, string | number>): Promise<MapFeedData> {
+  const query = filters ? `?${new URLSearchParams(Object.entries(filters).map(([k, v]) => [k, String(v)]))}` : '';
+  const res = await fetch(`${API_BASE}/map-feed${query}`, { cache: 'no-store' });
   if (!res.ok) {
     throw new Error(`Failed to load map feed: ${res.statusText}`);
   }
+  return res.json();
+}
+
+export async function analyzeTrend(payload: { lat: number; lng: number; radius_km: number; dbscan_eps_km: number; days: number }): Promise<TrendAnalysis> {
+  const res = await fetch(`${API_BASE}/trends/analyze`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  if (!res.ok) throw new Error('Trend analysis failed');
   return res.json();
 }
 

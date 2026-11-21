@@ -38,25 +38,25 @@ export default function MiniMapPicker({ lat, lng, onChange }: MiniMapPickerProps
           className: '',
           html: `
             <div style="
-              width: 34px;
-              height: 34px;
+              width: 38px;
+              height: 38px;
               border-radius: 50%;
               background: #15803d;
               display: flex;
               align-items: center;
               justify-content: center;
-              box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+              box-shadow: 0 4px 10px rgba(0,0,0,0.4);
               border: 2px solid white;
               cursor: grab;
             ">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
                 <circle cx="12" cy="10" r="3"/>
               </svg>
             </div>
           `,
-          iconSize: [34, 34],
-          iconAnchor: [17, 34],
+          iconSize: [38, 38],
+          iconAnchor: [19, 38],
         });
 
         const marker = L.marker([lat, lng], { draggable: true, icon: customIcon }).addTo(map);
@@ -72,24 +72,28 @@ export default function MiniMapPicker({ lat, lng, onChange }: MiniMapPickerProps
         });
 
         mapInstance.current = map;
-        setTimeout(() => {
-          if (map) map.invalidateSize();
-        }, 250);
+        [60, 200, 500, 1000].forEach((ms) => {
+          setTimeout(() => {
+            if (mapInstance.current) mapInstance.current.invalidateSize();
+          }, ms);
+        });
       } else if (markerRef.current && mapInstance.current) {
         markerRef.current.setLatLng([lat, lng]);
         mapInstance.current.panTo([lat, lng]);
       }
     }
     init();
+
     return () => {
       isMounted = false;
     };
   }, [lat, lng, onChange]);
 
   return (
-    <div className="relative w-full h-56 rounded-xl overflow-hidden border-2 border-emerald-500/80 shadow-md">
+    <div className="relative w-full h-64 sm:h-72 rounded-2xl overflow-hidden border-2 border-emerald-500/80 shadow-md">
       <div ref={mapRef} className="w-full h-full" />
-      <div className="absolute top-2 right-2 z-[400] bg-white/95 backdrop-blur px-2.5 py-1 rounded-lg text-[10px] font-bold text-gray-700 shadow border border-gray-200 flex items-center gap-1">
+      <div className="absolute top-2.5 right-2.5 z-[400] bg-white/95 backdrop-blur px-3 py-1 rounded-xl text-[10px] font-extrabold text-gray-800 shadow border border-gray-200 flex items-center gap-1.5">
+        <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
         <span>Click map or drag pin to position</span>
       </div>
     </div>

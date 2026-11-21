@@ -74,6 +74,43 @@ class RemediesKAUResponse(BaseModel):
     source_citation: str
     last_checked: date
 
+class OutbreakBreakdownItem(BaseModel):
+    disease_code: Optional[str] = None
+    threat_code: Optional[str] = None
+    label: str
+    current_7d_count: int
+    previous_7d_count: int
+    growth_pct: float
+    spread_status: Literal["spreading", "active_cluster", "watch", "isolated"]
+    cluster_count: int = 0
+    center: Optional[Dict[str, float]] = None
+    affected_areas: List[str] = Field(default_factory=list)
+
+class TrendAnalyzeRequest(BaseModel):
+    lat: float = Field(..., ge=-90, le=90)
+    lng: float = Field(..., ge=-180, le=180)
+    radius_km: float = Field(3.0, gt=0, le=50)
+    dbscan_eps_km: float = Field(2.0, gt=0, le=50)
+    days: int = Field(7, ge=1, le=14)
+
+class TrendDiseaseResult(BaseModel):
+    disease_code: str
+    label: str
+    distance_km: float
+    current_count: int
+    previous_count: int
+    trend_label: str
+    percentage_change: float
+    cluster_center: Optional[Dict[str, float]] = None
+    action_summary: Optional[List[str]] = None
+
+class TrendAnalyzeResponse(BaseModel):
+    selected_location: Dict[str, float]
+    dbscan_summary: Dict[str, Any]
+    spreading_diseases: List[TrendDiseaseResult]
+    canal_salinity_status: Dict[str, Any]
+    recommended_actions: List[str]
+
 class ActionGuidance(BaseModel):
     title: str
     title_ml: str
@@ -132,6 +169,7 @@ class MapFeedResponse(BaseModel):
     active_clusters: List[ClusterResponse]
     affected_canals: List[CanalSegmentResponse]
     rainfall_summary: Optional[Dict[str, Any]] = None
+    outbreak_breakdown: List[OutbreakBreakdownItem] = Field(default_factory=list)
 
 class OfficerDashboardResponse(BaseModel):
     unconfirmed_queue: List[ReportResponse]

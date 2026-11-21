@@ -65,6 +65,54 @@ KAU_REMEDIES_REGISTRY: Dict[str, Dict[str, Any]] = {
         "spray_guidance": "KAU PoP Guideline: Seed treatment with Pseudomonas fluorescens (10 g/kg seed) followed by seedling root dip (2.5 kg/ha). Foliar spray of Pseudomonas fluorescens (20 g/L) on initial leaf spotting. For neck blast protection at panicle emergence, consult Krishi Bhavan for university-evaluated bio-fungicides or isoprothiolane 40 EC (1.5 ml/L).",
         "source_citation": "KAU Rice Research Station Moncompu, Crop Health Advisory 2026.",
         "last_checked": date(2026, 10, 1)
+    },
+    "sheath_rot": {
+        "disease_code": "sheath_rot", "disease_name_en": "Sheath Rot", "disease_name_ml": "ഷീത്ത് ചെംചീയൽ",
+        "immediate_actions": ["Remove badly affected tillers and weeds.", "Avoid excess nitrogen and dense canopy.", "Improve drainage and field aeration."],
+        "spray_guidance": "KAU Package of Practices: use approved biological disease management and consult Moncompu Rice Research Station before any chemical intervention.",
+        "source_citation": "KAU Package of Practices / Moncompu Rice Research Station", "last_checked": date(2026, 10, 1)
+    },
+    "brown_leaf_spot": {
+        "disease_code": "brown_leaf_spot", "disease_name_en": "Brown Leaf Spot", "disease_name_ml": "തവിട്ടിലപ്പുള്ളി",
+        "immediate_actions": ["Use clean seed and remove infected residues.", "Maintain balanced potash and avoid drought stress.", "Improve field sanitation and ventilation."],
+        "spray_guidance": "KAU Package of Practices: use a verified seed treatment or biological option; contact Krishi Bhavan for a current approved spray recommendation.",
+        "source_citation": "KAU Package of Practices / Moncompu Rice Research Station", "last_checked": date(2026, 10, 1)
+    },
+    "rice_tungro": {
+        "disease_code": "rice_tungro", "disease_name_en": "Rice Tungro / Hopper-Vector Yellowing", "disease_name_ml": "നെല്ലിലെ തുംഗ്രോ",
+        "immediate_actions": ["Rogue severely affected plants and remove them from the field.", "Control volunteer rice and grassy weeds.", "Avoid staggered planting and coordinate planting dates locally."],
+        "spray_guidance": "KAU Package of Practices: use resistant varieties and integrated vector management; consult Krishi Bhavan before selecting any insecticide.",
+        "source_citation": "KAU Package of Practices / Moncompu Rice Research Station", "last_checked": date(2026, 10, 1)
+    },
+    "rice_stem_borer": {
+        "disease_code": "rice_stem_borer", "disease_name_en": "Rice Stem Borer", "disease_name_ml": "നെല്ലിലെ തണ്ട് തുരപ്പൻ",
+        "immediate_actions": ["Remove dead hearts and destroy infested tillers.", "Use light traps and conserve parasitoids.", "Avoid excess nitrogen that produces lush susceptible growth."],
+        "spray_guidance": "KAU Package of Practices: use integrated pest management and contact Krishi Bhavan for the current approved treatment.", "source_citation": "KAU Package of Practices / Moncompu Rice Research Station", "last_checked": date(2026, 10, 1)
+    },
+    "rice_leaf_folder": {
+        "disease_code": "rice_leaf_folder", "disease_name_en": "Rice Leaf Folder", "disease_name_ml": "നെല്ലിലെ ഇലചുരുട്ടിപ്പുഴു",
+        "immediate_actions": ["Open folded leaves and remove larvae where practical.", "Avoid unnecessary broad-spectrum sprays.", "Maintain field scouting along bunds and crop edges."],
+        "spray_guidance": "KAU Package of Practices: conserve natural enemies and consult Krishi Bhavan before any approved intervention.", "source_citation": "KAU Package of Practices / Moncompu Rice Research Station", "last_checked": date(2026, 10, 1)
+    },
+    "rice_gall_midge": {
+        "disease_code": "rice_gall_midge", "disease_name_en": "Rice Gall Midge", "disease_name_ml": "നെല്ലിലെ കതിര്‍ ഈച്ച",
+        "immediate_actions": ["Remove silver shoots and volunteer rice.", "Synchronize planting with nearby fields.", "Use locally recommended resistant varieties."],
+        "spray_guidance": "KAU Package of Practices: use resistant varieties and integrated vector management; confirm treatment with Krishi Bhavan.", "source_citation": "KAU Package of Practices / Moncompu Rice Research Station", "last_checked": date(2026, 10, 1)
+    },
+    "rice_hispa": {
+        "disease_code": "rice_hispa", "disease_name_en": "Rice Hispa", "disease_name_ml": "നെല്ലിലെ ഹിസ്പ",
+        "immediate_actions": ["Collect and destroy heavily damaged leaves.", "Avoid excess nitrogen and dense canopy.", "Monitor nursery beds and field margins twice weekly."],
+        "spray_guidance": "KAU Package of Practices: start with field sanitation and natural-enemy conservation; seek a current approved recommendation from Krishi Bhavan.", "source_citation": "KAU Package of Practices / Moncompu Rice Research Station", "last_checked": date(2026, 10, 1)
+    },
+    "false_smut": {
+        "disease_code": "false_smut", "disease_name_en": "False Smut", "disease_name_ml": "കതിരിലെ കള്ളക്കരി",
+        "immediate_actions": ["Remove smut balls before they release spores.", "Avoid excessive nitrogen at booting.", "Keep seed and field sanitation strong."],
+        "spray_guidance": "KAU Package of Practices: use clean seed and a verified integrated disease-management programme; consult Moncompu RRS.", "source_citation": "KAU Package of Practices / Moncompu Rice Research Station", "last_checked": date(2026, 10, 1)
+    },
+    "grain_discoloration": {
+        "disease_code": "grain_discoloration", "disease_name_en": "Grain Discoloration", "disease_name_ml": "നെല്ലുമണിയുടെ നിറവ്യത്യാസം",
+        "immediate_actions": ["Harvest at proper maturity and dry grain quickly.", "Use clean seed and remove infected residues.", "Improve ventilation and avoid prolonged wet panicles."],
+        "spray_guidance": "KAU Package of Practices: use clean seed and post-harvest hygiene; request a current approved recommendation if disease pressure rises.", "source_citation": "KAU Package of Practices / Moncompu Rice Research Station", "last_checked": date(2026, 10, 1)
     }
 }
 

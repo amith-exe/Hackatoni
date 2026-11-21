@@ -13,7 +13,9 @@ VALID_DISEASE_CODES = {
     "brown_planthopper",
     "sheath_blight",
     "bacterial_leaf_blight",
-    "rice_blast"
+    "rice_blast", "sheath_rot", "brown_leaf_spot", "rice_tungro",
+    "rice_stem_borer", "rice_leaf_folder", "rice_gall_midge", "rice_hispa",
+    "false_smut", "grain_discoloration"
 }
 
 def classify_crop_image(photo_url: Optional[str], hints: Optional[Dict[str, Any]] = None) -> Tuple[str, float, Dict[str, Any]]:
@@ -44,6 +46,24 @@ def classify_crop_image(photo_url: Optional[str], hints: Optional[Dict[str, Any]
         return "bacterial_leaf_blight", 0.86, {"model": "kuttanad_rice_v1_stub", "top_class": "bacterial_leaf_blight"}
     elif "blast" in url_lower:
         return "rice_blast", 0.89, {"model": "kuttanad_rice_v1_stub", "top_class": "rice_blast"}
+    elif "sheath_rot" in url_lower or "sheathrot" in url_lower:
+        return "sheath_rot", 0.86, {"model": "kuttanad_rice_v1_stub", "top_class": "sheath_rot"}
+    elif "brown_leaf" in url_lower or "leafspot" in url_lower:
+        return "brown_leaf_spot", 0.84, {"model": "kuttanad_rice_v1_stub", "top_class": "brown_leaf_spot"}
+    elif "tungro" in url_lower:
+        return "rice_tungro", 0.83, {"model": "kuttanad_rice_v1_stub", "top_class": "rice_tungro"}
+    elif "stem_borer" in url_lower or "stemborer" in url_lower:
+        return "rice_stem_borer", 0.82, {"model": "kuttanad_rice_v1_stub", "top_class": "rice_stem_borer"}
+    elif "leaf_folder" in url_lower or "leaffolder" in url_lower:
+        return "rice_leaf_folder", 0.82, {"model": "kuttanad_rice_v1_stub", "top_class": "rice_leaf_folder"}
+    elif "gall_midge" in url_lower or "gallmidge" in url_lower:
+        return "rice_gall_midge", 0.81, {"model": "kuttanad_rice_v1_stub", "top_class": "rice_gall_midge"}
+    elif "hispa" in url_lower:
+        return "rice_hispa", 0.81, {"model": "kuttanad_rice_v1_stub", "top_class": "rice_hispa"}
+    elif "false_smut" in url_lower or "falsesmut" in url_lower:
+        return "false_smut", 0.80, {"model": "kuttanad_rice_v1_stub", "top_class": "false_smut"}
+    elif "grain_discoloration" in url_lower or "graindiscoloration" in url_lower:
+        return "grain_discoloration", 0.80, {"model": "kuttanad_rice_v1_stub", "top_class": "grain_discoloration"}
     elif "uncertain" in url_lower or "blur" in url_lower or "low_conf" in url_lower:
         # Deliberate low-confidence test case
         return "brown_planthopper", 0.52, {"model": "kuttanad_rice_v1_stub", "note": "low_confidence_below_threshold"}

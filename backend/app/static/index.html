@@ -20,11 +20,14 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
     #viewMap {
-      height: calc(100vh - 105px) !important;
-      min-height: 520px !important;
-      display: flex !important;
-      flex-direction: column !important;
+      height: calc(100vh - 105px);
+      min-height: 520px;
+      display: flex;
+      flex-direction: column;
       position: relative;
+    }
+    #viewMap.hidden, #viewReport.hidden, #viewVerify.hidden, #viewAlerts.hidden {
+      display: none !important;
     }
     .map-canvas-container {
       position: relative !important;
@@ -42,11 +45,12 @@
       background-color: #e2e8f0;
     }
     #reportMapPicker {
-      height: 240px !important;
-      min-height: 240px !important;
+      height: 280px !important;
+      min-height: 280px !important;
       width: 100% !important;
-      border-radius: 0.75rem;
+      border-radius: 1rem;
       background-color: #e2e8f0;
+      position: relative;
       z-index: 10;
     }
     .custom-pin {
@@ -258,157 +262,279 @@
   </div>
 
   <!-- VIEW 2: SUBMIT REPORT -->
-  <div id="viewReport" class="hidden flex-1 bg-gradient-to-b from-emerald-50/50 to-gray-50 py-4 sm:py-6 overflow-y-auto">
-    <div class="max-w-2xl mx-auto p-4 pb-20">
-      <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-        <div class="bg-emerald-800 text-white p-4 sm:p-5">
-          <div class="flex items-center gap-2 mb-1">
-            <svg class="w-5 h-5 text-emerald-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-            <h2 class="text-lg sm:text-xl font-extrabold" id="formHeaderTitle">Submit Incident Report</h2>
+  <div id="viewReport" class="hidden flex-1 bg-gradient-to-b from-emerald-50/40 via-white to-gray-50 py-4 sm:py-6 overflow-y-auto">
+    <div class="max-w-3xl mx-auto p-4 sm:p-6 pb-24">
+      <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+        <!-- Top Banner Header -->
+        <div class="bg-emerald-800 text-white p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <svg class="w-5 h-5 text-emerald-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight" id="formHeaderTitle">Submit Incident Report</h2>
+            </div>
+            <p class="text-xs text-emerald-100 font-medium" id="formHeaderDesc">
+              Broadcasts immediate early-warning across connected polders and triggers neighbor confirmation
+            </p>
           </div>
-          <p class="text-xs text-emerald-100" id="formHeaderDesc">
-            Submit field incident to trigger automated hydrological routing and neighbor confirmation
-          </p>
+          <div class="bg-emerald-900/80 border border-emerald-700/80 rounded-xl px-3 py-1.5 text-right self-start sm:self-auto">
+            <span class="text-[10px] text-emerald-300 uppercase tracking-wider block font-bold">Reporting Profile</span>
+            <span class="text-xs font-bold text-white flex items-center gap-1 justify-end">
+              <svg class="w-3.5 h-3.5 text-emerald-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span id="reportProfileName">Thomas Kutty (Pulincunnoo)</span>
+            </span>
+          </div>
         </div>
 
-        <form id="reportForm" onsubmit="handleFormSubmit(event)" class="p-4 sm:p-5 space-y-6">
-          <!-- Step 1: What happened? -->
-          <div class="space-y-2">
-            <div class="border-b border-gray-200 pb-1.5">
-              <h3 class="text-sm font-extrabold text-gray-900" id="txtStep1Title">Step 1 — What happened?</h3>
-              <p class="text-[11px] text-gray-500" id="txtStep1Desc">Select the primary issue category affecting your field or channel</p>
+        <!-- 3-Step Guided Progress Tracker -->
+        <div class="bg-gray-50/80 border-b border-gray-200 px-4 sm:px-6 py-3">
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-emerald-700 text-white font-extrabold flex items-center justify-center text-xs shadow-sm">1</span>
+              <span class="font-bold text-gray-900">Incident Type</span>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-              <button type="button" onclick="selectType('crop_disease')" id="btn_crop_disease" class="type-btn p-3 rounded-xl border text-left bg-emerald-700 text-white border-emerald-700 shadow-md min-h-[72px]">
-                <div class="font-extrabold text-xs sm:text-sm mb-1 flex items-center gap-1.5">
-                  <svg class="w-4 h-4 text-emerald-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>
-                  <span>Crop Disease</span>
+            <div class="flex-1 mx-2 sm:mx-4 h-0.5 bg-emerald-300"></div>
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-emerald-700 text-white font-extrabold flex items-center justify-center text-xs shadow-sm">2</span>
+              <span class="font-bold text-gray-900">Field Locus</span>
+            </div>
+            <div class="flex-1 mx-2 sm:mx-4 h-0.5 bg-emerald-300"></div>
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-emerald-700 text-white font-extrabold flex items-center justify-center text-xs shadow-sm">3</span>
+              <span class="font-bold text-gray-900">Evidence & Advice</span>
+            </div>
+          </div>
+        </div>
+
+        <form id="reportForm" onsubmit="handleFormSubmit(event)" class="p-5 sm:p-7 space-y-7">
+          <!-- STEP 1: What happened? -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between border-b border-gray-200 pb-2">
+              <div>
+                <h3 class="text-sm font-extrabold text-gray-900 flex items-center gap-1.5" id="txtStep1Title">
+                  <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold flex items-center justify-center">1</span>
+                  <span>Step 1 — What happened?</span>
+                </h3>
+                <p class="text-[11px] text-gray-500 mt-0.5" id="txtStep1Desc">Select the primary issue category affecting your field or channel</p>
+              </div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                Required
+              </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <!-- Crop Disease -->
+              <button type="button" onclick="selectType('crop_disease')" id="btn_crop_disease" class="type-btn p-3.5 rounded-2xl border-2 text-left transition relative flex flex-col justify-between min-h-[82px] bg-emerald-700 text-white border-emerald-700 shadow-md">
+                <div>
+                  <div class="flex items-center justify-between gap-1 mb-1">
+                    <div class="font-extrabold text-xs sm:text-sm flex items-center gap-2">
+                      <div class="w-7 h-7 rounded-lg bg-emerald-800 text-emerald-200 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-emerald-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/></svg>
+                      </div>
+                      <span>Crop Disease</span>
+                    </div>
+                    <span id="badge_crop_disease" class="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-emerald-900 text-emerald-200 border border-emerald-600">Active</span>
+                  </div>
+                  <p class="text-[11px] text-white/90 leading-snug mt-1">Brown Plant Hopper (BPH), Sheath Blight, Bacterial Leaf Blight</p>
                 </div>
-                <div class="text-[11px] text-white/90">Brown Plant Hopper, Sheath Blight, Bacterial Blight</div>
               </button>
-              <button type="button" onclick="selectType('salinity')" id="btn_salinity" class="type-btn p-3 rounded-xl border text-left bg-blue-50/50 text-blue-950 border-blue-200 hover:bg-blue-50 min-h-[72px]">
-                <div class="font-extrabold text-xs sm:text-sm mb-1 flex items-center gap-1.5">
-                  <svg class="w-4 h-4 text-blue-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>
-                  <span>Salinity Ingress</span>
+
+              <!-- Salinity Ingress -->
+              <button type="button" onclick="selectType('salinity')" id="btn_salinity" class="type-btn p-3.5 rounded-2xl border-2 text-left transition relative flex flex-col justify-between min-h-[82px] bg-blue-50/50 text-blue-950 border-blue-200 hover:bg-blue-50">
+                <div>
+                  <div class="flex items-center justify-between gap-1 mb-1">
+                    <div class="font-extrabold text-xs sm:text-sm flex items-center gap-2">
+                      <div class="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-blue-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>
+                      </div>
+                      <span>Salinity Ingress</span>
+                    </div>
+                    <span id="badge_salinity" class="hidden text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-blue-900 text-white">Active</span>
+                  </div>
+                  <p class="text-[11px] text-gray-600 leading-snug mt-1">Canal water salinity above 2.0 ppt threshold near sluice gates</p>
                 </div>
-                <div class="text-[11px] text-gray-600">Canal water salinity above 2.0 ppt threshold</div>
               </button>
-              <button type="button" onclick="selectType('bird_deaths')" id="btn_bird_deaths" class="type-btn p-3 rounded-xl border text-left bg-rose-50/50 text-rose-950 border-rose-200 hover:bg-rose-50 min-h-[72px]">
-                <div class="font-extrabold text-xs sm:text-sm mb-1 flex items-center gap-1.5">
-                  <svg class="w-4 h-4 text-rose-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                  <span>Duck Mortality</span>
+
+              <!-- Duck Mortality -->
+              <button type="button" onclick="selectType('bird_deaths')" id="btn_bird_deaths" class="type-btn p-3.5 rounded-2xl border-2 text-left transition relative flex flex-col justify-between min-h-[82px] bg-rose-50/50 text-rose-950 border-rose-200 hover:bg-rose-50">
+                <div>
+                  <div class="flex items-center justify-between gap-1 mb-1">
+                    <div class="font-extrabold text-xs sm:text-sm flex items-center gap-2">
+                      <div class="w-7 h-7 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-rose-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                      </div>
+                      <span>Duck Mortality</span>
+                    </div>
+                    <span id="badge_bird_deaths" class="hidden text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-rose-900 text-white">Active</span>
+                  </div>
+                  <p class="text-[11px] text-gray-600 leading-snug mt-1">Unexplained bird deaths or Avian Influenza cluster symptoms</p>
                 </div>
-                <div class="text-[11px] text-gray-600">Unexplained bird deaths or Avian Flu symptoms</div>
               </button>
-              <button type="button" onclick="selectType('bund_seepage')" id="btn_bund_seepage" class="type-btn p-3 rounded-xl border text-left bg-amber-50/50 text-amber-950 border-amber-200 hover:bg-amber-50 min-h-[72px]">
-                <div class="font-extrabold text-xs sm:text-sm mb-1 flex items-center gap-1.5">
-                  <svg class="w-4 h-4 text-amber-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                  <span>Bund Seepage</span>
+
+              <!-- Bund Seepage -->
+              <button type="button" onclick="selectType('bund_seepage')" id="btn_bund_seepage" class="type-btn p-3.5 rounded-2xl border-2 text-left transition relative flex flex-col justify-between min-h-[82px] bg-amber-50/50 text-amber-950 border-amber-200 hover:bg-amber-50">
+                <div>
+                  <div class="flex items-center justify-between gap-1 mb-1">
+                    <div class="font-extrabold text-xs sm:text-sm flex items-center gap-2">
+                      <div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-amber-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                      </div>
+                      <span>Outer Bund Seepage</span>
+                    </div>
+                    <span id="badge_bund_seepage" class="hidden text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-amber-900 text-white">Active</span>
+                  </div>
+                  <p class="text-[11px] text-gray-600 leading-snug mt-1">Active boiling piping breach, surface sweat, or crest tension crack</p>
                 </div>
-                <div class="text-[11px] text-gray-600">Boiling piping breach or outer ring bund crack</div>
               </button>
-              <button type="button" onclick="selectType('crop_loss')" id="btn_crop_loss" class="type-btn p-3 rounded-xl border text-left bg-purple-50/50 text-purple-950 border-purple-200 hover:bg-purple-50 sm:col-span-2 min-h-[72px]">
-                <div class="font-extrabold text-xs sm:text-sm mb-1 flex items-center gap-1.5">
-                  <svg class="w-4 h-4 text-purple-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-                  <span>Crop Loss</span>
+
+              <!-- Crop Loss -->
+              <button type="button" onclick="selectType('crop_loss')" id="btn_crop_loss" class="type-btn p-3.5 rounded-2xl border-2 text-left transition relative flex flex-col justify-between min-h-[82px] bg-purple-50/50 text-purple-950 border-purple-200 hover:bg-purple-50 sm:col-span-2">
+                <div>
+                  <div class="flex items-center justify-between gap-1 mb-1">
+                    <div class="font-extrabold text-xs sm:text-sm flex items-center gap-2">
+                      <div class="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-purple-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                      </div>
+                      <span>Crop Loss Claim</span>
+                    </div>
+                    <span id="badge_crop_loss" class="hidden text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-purple-900 text-white">Active</span>
+                  </div>
+                  <p class="text-[11px] text-gray-600 leading-snug mt-1">AIMS 72-hour statutory compensation survey due to submergence or saline intrusion</p>
                 </div>
-                <div class="text-[11px] text-gray-600">AIMS 72-hour statutory compensation claim survey</div>
               </button>
             </div>
           </div>
 
-          <!-- Step 2: Where is it? -->
-          <div class="space-y-2">
-            <div class="border-b border-gray-200 pb-1.5 flex items-center justify-between">
+          <!-- STEP 2: Where is it? -->
+          <div class="space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-200 pb-2">
               <div>
-                <h3 class="text-sm font-extrabold text-gray-900" id="txtStep2Title">Step 2 — Where is it?</h3>
-                <p class="text-[11px] text-gray-500" id="txtStep2Desc">Tap on the mini-map or drag the pin to mark your exact polder or bund</p>
+                <h3 class="text-sm font-extrabold text-gray-900 flex items-center gap-1.5" id="txtStep2Title">
+                  <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold flex items-center justify-center">2</span>
+                  <span>Step 2 — Where is your field?</span>
+                </h3>
+                <p class="text-[11px] text-gray-500 mt-0.5" id="txtStep2Desc">Tap anywhere on the mini-map or drag the green pin to position</p>
               </div>
-              <button type="button" onclick="locateGPS()" class="flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1.5 rounded-xl text-xs transition border border-emerald-200">
+              <button type="button" onclick="locateGPS()" class="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold px-3 py-1.5 rounded-xl text-xs transition border border-emerald-300 shadow-sm self-start sm:self-auto">
                 <svg class="w-3.5 h-3.5 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><circle cx="12" cy="12" r="7"/></svg>
                 <span>Use My GPS</span>
               </button>
             </div>
 
-            <!-- Mini Map -->
-            <div class="relative w-full my-2">
+            <!-- Detected Polder Banner -->
+            <div class="flex items-center justify-between p-2.5 bg-emerald-50/70 border border-emerald-200 rounded-xl text-xs">
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-emerald-700 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span class="font-bold text-gray-700">Detected Padasekharam:</span>
+                <span id="currentPolderBadge" class="font-extrabold text-emerald-900">Pulincunnoo Padasekharam</span>
+              </div>
+              <span id="gpsStatusNotice" class="text-[11px] text-emerald-700 font-semibold hidden sm:inline">Coordinates locked</span>
+            </div>
+
+            <!-- Interactive Mini Map Picker Container -->
+            <div class="relative w-full rounded-2xl overflow-hidden border-2 border-emerald-500/80 shadow-md">
               <div id="reportMapPicker"></div>
-              <div class="absolute top-2 right-2 z-[400] bg-white/95 backdrop-blur px-2.5 py-1 rounded-lg text-[10px] font-bold text-gray-700 shadow border border-gray-200">
-                Click map or drag pin to position
+              <div class="absolute top-2.5 right-2.5 z-[400] bg-white/95 backdrop-blur px-3 py-1 rounded-xl text-[10px] font-extrabold text-gray-800 shadow border border-gray-200 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+                <span>Click map or drag pin to position</span>
               </div>
             </div>
 
-            <!-- Presets -->
+            <!-- Preset Pills -->
             <div class="flex flex-wrap items-center gap-1.5 pt-1">
-              <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mr-1">Presets:</span>
-              <button type="button" onclick="setCoords(9.446, 76.458)" class="px-2.5 py-1 bg-gray-50 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-bold border border-gray-200">Pulincunnoo</button>
-              <button type="button" onclick="setCoords(9.429, 76.439)" class="px-2.5 py-1 bg-gray-50 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-bold border border-gray-200">Moncompu</button>
-              <button type="button" onclick="setCoords(9.436, 76.404)" class="px-2.5 py-1 bg-gray-50 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-bold border border-gray-200">Nedumudy</button>
-              <button type="button" onclick="setCoords(9.476, 76.392)" class="px-2.5 py-1 bg-gray-50 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-bold border border-gray-200">Kainakary</button>
-              <button type="button" onclick="setCoords(9.420, 76.423)" class="px-2.5 py-1 bg-gray-50 hover:bg-emerald-50 text-gray-700 rounded-lg text-xs font-bold border border-gray-200">Champakulam</button>
+              <span class="text-[10px] text-gray-500 font-bold uppercase tracking-wider mr-1">Quick Presets:</span>
+              <button type="button" onclick="setCoords(9.446, 76.458)" id="pill_pulincunnoo" class="preset-pill px-3 py-1 bg-emerald-700 text-white rounded-xl text-xs font-bold border border-emerald-700 shadow-sm transition">Pulincunnoo</button>
+              <button type="button" onclick="setCoords(9.429, 76.439)" id="pill_moncompu" class="preset-pill px-3 py-1 bg-white text-gray-700 hover:bg-emerald-50 rounded-xl text-xs font-bold border border-gray-200 transition">Moncompu</button>
+              <button type="button" onclick="setCoords(9.436, 76.404)" id="pill_nedumudy" class="preset-pill px-3 py-1 bg-white text-gray-700 hover:bg-emerald-50 rounded-xl text-xs font-bold border border-gray-200 transition">Nedumudy</button>
+              <button type="button" onclick="setCoords(9.476, 76.392)" id="pill_kainakary" class="preset-pill px-3 py-1 bg-white text-gray-700 hover:bg-emerald-50 rounded-xl text-xs font-bold border border-gray-200 transition">Kainakary</button>
+              <button type="button" onclick="setCoords(9.420, 76.423)" id="pill_champakulam" class="preset-pill px-3 py-1 bg-white text-gray-700 hover:bg-emerald-50 rounded-xl text-xs font-bold border border-gray-200 transition">Champakulam</button>
             </div>
 
-            <!-- Lat/Lng -->
-            <div class="grid grid-cols-2 gap-2 text-xs pt-1">
-              <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-200">
-                <span class="text-[10px] text-gray-500 font-bold uppercase block mb-0.5">Latitude</span>
-                <input id="inputLat" type="number" step="0.0001" value="9.446" oninput="updatePinFromInputs()" class="w-full bg-transparent font-extrabold text-gray-900 focus:outline-none" />
+            <!-- Coordinates Readout Cards -->
+            <div class="grid grid-cols-2 gap-3 text-xs pt-1">
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                <span class="text-[10px] text-gray-500 font-bold uppercase block mb-0.5">Latitude (North)</span>
+                <input id="inputLat" type="number" step="0.0001" value="9.446" oninput="updatePinFromInputs()" class="w-full bg-transparent font-extrabold text-sm text-gray-900 focus:outline-none" />
               </div>
-              <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-200">
-                <span class="text-[10px] text-gray-500 font-bold uppercase block mb-0.5">Longitude</span>
-                <input id="inputLng" type="number" step="0.0001" value="76.458" oninput="updatePinFromInputs()" class="w-full bg-transparent font-extrabold text-gray-900 focus:outline-none" />
+              <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                <span class="text-[10px] text-gray-500 font-bold uppercase block mb-0.5">Longitude (East)</span>
+                <input id="inputLng" type="number" step="0.0001" value="76.458" oninput="updatePinFromInputs()" class="w-full bg-transparent font-extrabold text-sm text-gray-900 focus:outline-none" />
               </div>
             </div>
           </div>
 
-          <!-- Step 3: Details, Photo & Notes -->
-          <div class="space-y-3">
-            <div class="border-b border-gray-200 pb-1.5">
-              <h3 class="text-sm font-extrabold text-gray-900" id="txtStep3Title">Step 3 — Details, Photo & Notes</h3>
-              <p class="text-[11px] text-gray-500" id="txtStep3Desc">Provide specifics to help neighbors verify and officials take action</p>
+          <!-- STEP 3: Details, Photo & Notes -->
+          <div class="space-y-4">
+            <div class="border-b border-gray-200 pb-2">
+              <h3 class="text-sm font-extrabold text-gray-900 flex items-center gap-1.5" id="txtStep3Title">
+                <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold flex items-center justify-center">3</span>
+                <span>Step 3 — Details, Photo & Voice Note</span>
+              </h3>
+              <p class="text-[11px] text-gray-500 mt-0.5" id="txtStep3Desc">Provide specifics to help neighbors verify and officials take action</p>
             </div>
 
-            <!-- Dynamic Fields -->
-            <div id="dynamicInputs" class="bg-gray-50 p-3.5 rounded-xl border border-gray-200 space-y-3">
-              <!-- Injected dynamically -->
+            <!-- Dynamic Specifics Container -->
+            <div id="dynamicInputs" class="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-3">
+              <!-- Injected dynamically based on selected type -->
             </div>
 
-            <!-- Photo Input -->
-            <div>
-              <label class="block text-xs font-bold text-gray-800 mb-1" id="lblPhotoEvidence">Photo Evidence</label>
-              <div class="flex items-center gap-2">
+            <!-- Photo Evidence Card with Live Thumbnail -->
+            <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-2">
+              <label class="block text-xs font-extrabold text-gray-800" id="lblPhotoEvidence">Photo Evidence & Symptoms</label>
+              <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <div class="relative flex-1">
-                  <input id="inputPhoto" type="text" placeholder="Paste image URL or click Sample..." class="w-full bg-white border border-gray-300 rounded-xl p-2.5 text-xs font-medium focus:outline-emerald-600 pl-8" />
+                  <input id="inputPhoto" type="text" oninput="handlePhotoInput(this.value)" placeholder="Paste image URL or click Sample Photo..." class="w-full bg-white border border-gray-300 rounded-xl p-2.5 text-xs font-medium focus:outline-emerald-600 pl-8" />
                   <svg class="w-4 h-4 text-gray-400 absolute left-2.5 top-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
                 </div>
-                <button type="button" onclick="document.getElementById('inputPhoto').value='https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b'" class="px-3 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-bold shrink-0 transition">
-                  Use Sample Photo
+                <button type="button" onclick="useSamplePhoto()" class="px-3.5 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-extrabold shrink-0 transition flex items-center justify-center gap-1.5 shadow-sm">
+                  <svg class="w-3.5 h-3.5 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <span>Use Sample Photo</span>
+                </button>
+              </div>
+
+              <!-- Live Photo Preview Box -->
+              <div id="photoPreviewContainer" class="hidden mt-2 p-2.5 bg-white rounded-xl border border-gray-200 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <img id="photoPreviewImg" src="" alt="Photo Evidence Preview" class="w-14 h-14 object-cover rounded-lg border border-gray-200 shadow-sm" />
+                  <div>
+                    <span class="text-xs font-bold text-gray-900 block" id="photoPreviewCaption">BPH Hopperburn Symptoms (Field Confirmed)</span>
+                    <span class="text-[10px] text-emerald-700 font-bold flex items-center gap-1 mt-0.5">
+                      <svg class="w-3 h-3 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      Verified resolution for diagnosis
+                    </span>
+                  </div>
+                </div>
+                <button type="button" onclick="clearPhotoEvidence()" class="text-xs text-rose-600 hover:text-rose-800 font-bold px-2.5 py-1.5 rounded-lg hover:bg-rose-50 transition">
+                  Remove
                 </button>
               </div>
             </div>
 
-            <!-- Field Notes & Sarvam Voice Placeholder -->
-            <div>
+            <!-- Field Notes & Sarvam Voice Card -->
+            <div class="bg-gray-50 p-4 rounded-2xl border border-gray-200 space-y-2">
               <div class="flex items-center justify-between mb-1">
-                <label class="text-xs font-bold text-gray-800" id="lblFieldNotes">Field Notes & Observations</label>
-                <button type="button" onclick="triggerVoiceNote()" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 hover:bg-amber-200 transition border border-amber-300">
-                  <svg class="w-3.5 h-3.5 text-amber-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-                  <span>Voice Input — Sarvam AI (Next Step)</span>
+                <label class="text-xs font-extrabold text-gray-800" id="lblFieldNotes">Field Notes & Observations</label>
+                <button type="button" onclick="triggerVoiceNote()" id="btnVoiceRecord" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-amber-100 hover:bg-amber-200 text-amber-900 transition border border-amber-300 shadow-sm">
+                  <svg id="voiceMicIcon" class="w-3.5 h-3.5 text-amber-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+                  <span id="voiceBtnText">Voice Input — Sarvam AI (Next Step)</span>
                 </button>
               </div>
-              <textarea id="inputNotes" rows="3" placeholder="Describe symptoms, water levels, or immediate assistance needed..." class="w-full bg-white border border-gray-300 rounded-xl p-2.5 text-xs focus:outline-emerald-600 font-medium"></textarea>
+              <textarea id="inputNotes" rows="3" placeholder="Describe symptoms, water levels, or immediate assistance needed..." class="w-full bg-white border border-gray-300 rounded-xl p-3 text-xs focus:outline-emerald-600 font-medium text-gray-800 shadow-sm"></textarea>
+              <div id="voiceTranscriptionBadge" class="hidden text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded-xl border border-emerald-200 flex items-center gap-1.5 font-bold">
+                <svg class="w-3.5 h-3.5 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Transcribed via Sarvam AI saaras:v4 (Malayalam / English Audio Model)</span>
+              </div>
             </div>
           </div>
 
           <!-- Submit Button -->
-          <button type="submit" id="submitBtn" class="w-full bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white font-extrabold py-3.5 px-4 rounded-xl text-xs sm:text-sm transition shadow-md flex items-center justify-center gap-2 min-h-[44px]">
+          <button type="submit" id="submitBtn" class="w-full bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white font-extrabold py-4 px-6 rounded-2xl text-sm transition shadow-lg flex items-center justify-center gap-2 min-h-[48px]">
             <span id="btnSubmitFormText">Submit Report & Generate Action Plan</span>
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </button>
         </form>
 
         <!-- Instant Action Card Display on Submit -->
-        <div id="actionCardResult" class="hidden p-5 border-t border-gray-200">
+        <div id="actionCardResult" class="hidden p-5 sm:p-7 border-t border-gray-200 bg-emerald-50/20">
           <!-- Dynamically populated -->
         </div>
       </div>
@@ -620,28 +746,31 @@
 
     function toggleLang() {
       currentLanguage = currentLanguage === 'en' ? 'ml' : 'en';
-      document.getElementById('btnLangText').innerText = currentLanguage === 'en' ? 'ML' : 'EN';
+      const btn = document.getElementById('btnLangText');
+      if (btn) btn.innerText = currentLanguage === 'en' ? 'ML' : 'EN';
       const t = dict[currentLanguage];
 
-      document.getElementById('txtNetworkName').innerText = t.networkName;
-      document.getElementById('txtTagline').innerText = t.tagline;
-      document.getElementById('navLiveMapLabel').innerText = t.liveMap;
-      document.getElementById('navReportLabel').innerText = t.report;
-      document.getElementById('navVerifyLabel').innerText = t.verify;
-      document.getElementById('navAlertsLabel').innerText = t.alerts;
-      document.getElementById('navHowItWorksLabel').innerText = t.howItWorks;
-      document.getElementById('btnReportIncidentLabel').innerText = t.reportIssue;
-      document.getElementById('mapPinHint').innerText = t.pinHint;
-      document.getElementById('seedBannerTitle').innerText = t.demoBannerTitle;
-      document.getElementById('seedBannerText').innerText = t.demoBannerText;
-      document.getElementById('txtStep1Title').innerText = t.step1Title;
-      document.getElementById('txtStep1Desc').innerText = t.step1Desc;
-      document.getElementById('txtStep2Title').innerText = t.step2Title;
-      document.getElementById('txtStep2Desc').innerText = t.step2Desc;
-      document.getElementById('txtStep3Title').innerText = t.step3Title;
-      document.getElementById('txtStep3Desc').innerText = t.step3Desc;
-      document.getElementById('btnSubmitFormText').innerText = t.submitBtn;
-      document.getElementById('btnReportAtPin').innerText = t.reportAtPin;
+      const setTxt = (id, val) => { const el = document.getElementById(id); if (el && val) el.innerText = val; };
+
+      setTxt('txtNetworkName', t.networkName);
+      setTxt('txtTagline', t.tagline);
+      setTxt('navLiveMapLabel', t.liveMap);
+      setTxt('navReportLabel', t.report);
+      setTxt('navVerifyLabel', t.verify);
+      setTxt('navAlertsLabel', t.alerts);
+      setTxt('navHowItWorksLabel', t.howItWorks);
+      setTxt('btnReportIncidentLabel', t.reportIssue);
+      setTxt('mapPinHint', t.pinHint);
+      setTxt('seedBannerTitle', t.demoBannerTitle);
+      setTxt('seedBannerText', t.demoBannerText);
+      setTxt('txtStep1Title', t.step1Title);
+      setTxt('txtStep1Desc', t.step1Desc);
+      setTxt('txtStep2Title', t.step2Title);
+      setTxt('txtStep2Desc', t.step2Desc);
+      setTxt('txtStep3Title', t.step3Title);
+      setTxt('txtStep3Desc', t.step3Desc);
+      setTxt('btnSubmitFormText', t.submitBtn);
+      setTxt('btnReportAtPin', t.reportAtPin);
     }
 
     function openHowItWorksModal() {
@@ -825,6 +954,55 @@
       }
     }
 
+    const kuttanadPolders = [
+      { name: 'Pulincunnoo Padasekharam', lat: 9.446, lng: 76.458 },
+      { name: 'Moncompu Padasekharam', lat: 9.429, lng: 76.439 },
+      { name: 'Nedumudy Padasekharam', lat: 9.436, lng: 76.404 },
+      { name: 'Kainakary Padasekharam', lat: 9.476, lng: 76.392 },
+      { name: 'Champakulam Padasekharam', lat: 9.420, lng: 76.423 },
+      { name: 'Ramankary Padasekharam', lat: 9.408, lng: 76.478 },
+      { name: 'Kavalam Padasekharam', lat: 9.492, lng: 76.421 }
+    ];
+
+    function getNearestPolderName(lat, lng) {
+      let closest = kuttanadPolders[0];
+      let minDist = 999999;
+      for (const p of kuttanadPolders) {
+        const d = Math.hypot(lat - p.lat, lng - p.lng);
+        if (d < minDist) {
+          minDist = d;
+          closest = p;
+        }
+      }
+      return closest.name;
+    }
+
+    function updatePolderLabel(lat, lng) {
+      const polderName = getNearestPolderName(lat, lng);
+      const el = document.getElementById('currentPolderBadge');
+      if (el) el.innerText = polderName;
+
+      // Update preset pills active state
+      ['pulincunnoo', 'moncompu', 'nedumudy', 'kainakary', 'champakulam'].forEach(k => {
+        const pill = document.getElementById('pill_' + k);
+        if (!pill) return;
+        const polderMap = {
+          pulincunnoo: { lat: 9.446, lng: 76.458 },
+          moncompu: { lat: 9.429, lng: 76.439 },
+          nedumudy: { lat: 9.436, lng: 76.404 },
+          kainakary: { lat: 9.476, lng: 76.392 },
+          champakulam: { lat: 9.420, lng: 76.423 }
+        };
+        const target = polderMap[k];
+        const isMatch = Math.abs(lat - target.lat) < 0.005 && Math.abs(lng - target.lng) < 0.005;
+        if (isMatch) {
+          pill.className = 'preset-pill px-3 py-1 bg-emerald-700 text-white rounded-xl text-xs font-bold border border-emerald-700 shadow-sm transition';
+        } else {
+          pill.className = 'preset-pill px-3 py-1 bg-white text-gray-700 hover:bg-emerald-50 rounded-xl text-xs font-bold border border-gray-200 transition';
+        }
+      });
+    }
+
     function initReportPickerMap() {
       const pickerEl = document.getElementById('reportMapPicker');
       if (!pickerEl) return;
@@ -842,19 +1020,19 @@
         L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
           maxZoom: 19,
           subdomains: ['a', 'b', 'c'],
-          attribution: '&copy; OpenStreetMap'
+          attribution: '&copy; OpenStreetMap | HOT'
         }).addTo(reportPickerMap);
 
-        const iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`;
-        const markerHtml = `<div style="background:#15803d;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,0.4);border:2px solid white;cursor:grab;">${iconSvg}</div>`;
+        const iconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`;
+        const markerHtml = `<div style="background:#15803d;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(0,0,0,0.4);border:2px solid white;cursor:grab;">${iconSvg}</div>`;
 
         pickerMarker = L.marker([lat, lng], {
           draggable: true,
           icon: L.divIcon({
             className: '',
             html: markerHtml,
-            iconSize: [34, 34],
-            iconAnchor: [17, 34]
+            iconSize: [38, 38],
+            iconAnchor: [19, 38]
           })
         }).addTo(reportPickerMap);
 
@@ -871,14 +1049,18 @@
         reportPickerMap.setView([lat, lng], 13);
       }
 
-      setTimeout(() => { if (reportPickerMap) reportPickerMap.invalidateSize(); }, 150);
-      setTimeout(() => { if (reportPickerMap) reportPickerMap.invalidateSize(); }, 450);
+      updatePolderLabel(lat, lng);
+      setTimeout(() => { if (reportPickerMap) reportPickerMap.invalidateSize(); }, 60);
+      setTimeout(() => { if (reportPickerMap) reportPickerMap.invalidateSize(); }, 200);
+      setTimeout(() => { if (reportPickerMap) reportPickerMap.invalidateSize(); }, 500);
+      setTimeout(() => { if (reportPickerMap) reportPickerMap.invalidateSize(); }, 900);
     }
 
     function updatePinFromInputs() {
       const lat = parseFloat(document.getElementById('inputLat').value);
       const lng = parseFloat(document.getElementById('inputLng').value);
       if (!isNaN(lat) && !isNaN(lng)) {
+        updatePolderLabel(lat, lng);
         if (reportPickerMap && pickerMarker) {
           pickerMarker.setLatLng([lat, lng]);
           reportPickerMap.panTo([lat, lng]);
@@ -889,6 +1071,7 @@
     function setCoords(lat, lng, moveMarker = true) {
       document.getElementById('inputLat').value = lat;
       document.getElementById('inputLng').value = lng;
+      updatePolderLabel(lat, lng);
       if (reportPickerMap && pickerMarker && moveMarker) {
         pickerMarker.setLatLng([lat, lng]);
         reportPickerMap.panTo([lat, lng]);
@@ -896,12 +1079,26 @@
     }
 
     function locateGPS() {
+      const notice = document.getElementById('gpsStatusNotice');
+      if (notice) notice.innerText = 'Locking GPS position...';
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(pos => {
-          setCoords(parseFloat(pos.coords.latitude.toFixed(4)), parseFloat(pos.coords.longitude.toFixed(4)));
-        }, () => setCoords(9.446, 76.458));
+          const userLat = parseFloat(pos.coords.latitude.toFixed(4));
+          const userLng = parseFloat(pos.coords.longitude.toFixed(4));
+          if (userLat >= 9.0 && userLat <= 10.2 && userLng >= 76.0 && userLng <= 77.0) {
+            setCoords(userLat, userLng);
+            if (notice) notice.innerText = `GPS locked: (${userLat}, ${userLng})`;
+          } else {
+            setCoords(9.446, 76.458);
+            if (notice) notice.innerText = 'GPS outside delta; Pulincunnoo demo selected';
+          }
+        }, () => {
+          setCoords(9.446, 76.458);
+          if (notice) notice.innerText = 'GPS unavailable; Pulincunnoo demo selected';
+        }, { timeout: 7000 });
       } else {
         setCoords(9.446, 76.458);
+        if (notice) notice.innerText = 'Browser GPS unavailable; Pulincunnoo selected';
       }
     }
 
@@ -919,15 +1116,23 @@
       document.getElementById('navVerify').className = inactiveNav;
       document.getElementById('navAlerts').className = inactiveNav + ' relative';
 
+      window.scrollTo({ top: 0, behavior: 'instant' });
+
       if (view === 'map') {
         document.getElementById('viewMap').classList.remove('hidden');
         document.getElementById('navMap').className = activeNav;
-        setTimeout(() => { if (currentMap) currentMap.invalidateSize(); }, 150);
-        setTimeout(() => { if (currentMap) currentMap.invalidateSize(); }, 500);
+        setTimeout(() => { if (currentMap) currentMap.invalidateSize(); }, 60);
+        setTimeout(() => { if (currentMap) currentMap.invalidateSize(); }, 250);
+        setTimeout(() => { if (currentMap) currentMap.invalidateSize(); }, 600);
       } else if (view === 'report') {
         document.getElementById('viewReport').classList.remove('hidden');
         document.getElementById('navReport').className = activeNav;
-        setTimeout(() => { initReportPickerMap(); }, 100);
+        renderDynamicInputs();
+        initReportPickerMap();
+        setTimeout(() => { if (reportPickerMap) reportPickerMap.invalidateSize(); }, 60);
+        setTimeout(() => { if (reportPickerMap) reportPickerMap.invalidateSize(); }, 200);
+        setTimeout(() => { if (reportPickerMap) reportPickerMap.invalidateSize(); }, 500);
+        setTimeout(() => { if (reportPickerMap) reportPickerMap.invalidateSize(); }, 900);
       } else if (view === 'verify') {
         document.getElementById('viewVerify').classList.remove('hidden');
         document.getElementById('navVerify').className = activeNav;
@@ -941,82 +1146,258 @@
 
     function selectType(t) {
       currentReportType = t;
-      ['crop_disease', 'salinity', 'bird_deaths', 'bund_seepage', 'crop_loss'].forEach(type => {
+      const allTypes = ['crop_disease', 'salinity', 'bird_deaths', 'bund_seepage', 'crop_loss'];
+
+      allTypes.forEach(type => {
         const btn = document.getElementById('btn_' + type);
+        const badge = document.getElementById('badge_' + type);
+        if (!btn) return;
+
         if (type === t) {
-          btn.className = 'type-btn p-3 rounded-xl border text-left bg-emerald-700 text-white border-emerald-700 shadow-md min-h-[72px]';
+          btn.className = 'type-btn p-3.5 rounded-2xl border-2 text-left transition relative flex flex-col justify-between min-h-[82px] bg-emerald-700 text-white border-emerald-700 shadow-md ring-2 ring-emerald-500 ' + (type === 'crop_loss' ? 'sm:col-span-2' : '');
+          if (badge) {
+            badge.classList.remove('hidden');
+            badge.innerText = 'Active';
+          }
         } else {
-          btn.className = 'type-btn p-3 rounded-xl border text-left bg-gray-50/50 text-gray-800 border-gray-200 hover:bg-gray-50 min-h-[72px]';
+          let lightBg = 'bg-gray-50/60 text-gray-900 border-gray-200 hover:bg-gray-100/70 hover:border-gray-300';
+          if (type === 'salinity') lightBg = 'bg-blue-50/50 text-blue-950 border-blue-200 hover:bg-blue-50';
+          else if (type === 'bird_deaths') lightBg = 'bg-rose-50/50 text-rose-950 border-rose-200 hover:bg-rose-50';
+          else if (type === 'bund_seepage') lightBg = 'bg-amber-50/50 text-amber-950 border-amber-200 hover:bg-amber-50';
+          else if (type === 'crop_loss') lightBg = 'bg-purple-50/50 text-purple-950 border-purple-200 hover:bg-purple-50 sm:col-span-2';
+
+          btn.className = 'type-btn p-3.5 rounded-2xl border-2 text-left transition relative flex flex-col justify-between min-h-[82px] ' + lightBg;
+          if (badge) badge.classList.add('hidden');
         }
       });
+
       renderDynamicInputs();
+    }
+
+    function updateSalinityDisplay(val) {
+      const el = document.getElementById('salVal');
+      if (!el) return;
+      const num = parseFloat(val);
+      if (num >= 2.0) {
+        el.className = 'text-xs font-black px-2.5 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-300';
+        el.innerText = `${num.toFixed(1)} ppt (Critical Danger)`;
+      } else if (num >= 1.5) {
+        el.className = 'text-xs font-black px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300';
+        el.innerText = `${num.toFixed(1)} ppt (Warning Ingress)`;
+      } else {
+        el.className = 'text-xs font-black px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300';
+        el.innerText = `${num.toFixed(1)} ppt (Safe Freshwater)`;
+      }
+    }
+
+    function setAcresPreset(ac) {
+      const input = document.getElementById('subAcres');
+      if (input) input.value = ac;
+    }
+
+    function adjustDuckCount(id, delta) {
+      const input = document.getElementById(id);
+      if (!input) return;
+      const current = parseInt(input.value) || 0;
+      input.value = Math.max(0, current + delta);
     }
 
     function renderDynamicInputs() {
       const container = document.getElementById('dynamicInputs');
+      if (!container) return;
+
       if (currentReportType === 'crop_disease') {
         container.innerHTML = `
-          <label class="block text-xs font-bold text-gray-800 mb-1">Paddy Disease Symptoms</label>
-          <select id="subDisease" class="w-full bg-white border border-gray-300 rounded-lg p-2.5 text-xs font-semibold">
-            <option value="brown_planthopper">Brown Plant Hopper (BPH)</option>
-            <option value="sheath_blight">Sheath Blight</option>
-            <option value="bacterial_leaf_blight">Bacterial Leaf Blight</option>
-            <option value="rice_blast">Rice Blast</option>
-          </select>
+          <div>
+            <label class="block text-xs font-extrabold text-gray-800 mb-1">Paddy Disease Symptoms</label>
+            <select id="subDisease" class="w-full bg-white border border-gray-300 rounded-xl p-2.5 text-xs font-bold text-gray-800 focus:outline-emerald-600 shadow-sm">
+              <option value="brown_planthopper">Brown Plant Hopper (BPH - Hopperburn)</option>
+              <option value="sheath_blight">Sheath Blight (Rhizoctonia solani)</option>
+              <option value="bacterial_leaf_blight">Bacterial Leaf Blight (BLB)</option>
+              <option value="rice_blast">Rice Blast (Magnaporthe oryzae)</option>
+            </select>
+          </div>
+          <div class="pt-2">
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-extrabold text-gray-800">Affected Area (Acres)</label>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="setAcresPreset(0.5)" class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-white border border-gray-200 hover:bg-emerald-50">0.5 ac</button>
+                <button type="button" onclick="setAcresPreset(1.0)" class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-white border border-gray-200 hover:bg-emerald-50">1.0 ac</button>
+                <button type="button" onclick="setAcresPreset(2.0)" class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-white border border-gray-200 hover:bg-emerald-50">2.0 ac</button>
+                <button type="button" onclick="setAcresPreset(5.0)" class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-white border border-gray-200 hover:bg-emerald-50">5.0+ ac</button>
+              </div>
+            </div>
+            <input id="subAcres" type="number" value="2.0" step="0.5" min="0.1" max="100" class="w-full bg-white border border-gray-300 rounded-xl p-2.5 text-xs font-bold text-gray-900 focus:outline-emerald-600 shadow-sm" />
+          </div>
         `;
       } else if (currentReportType === 'salinity') {
         container.innerHTML = `
-          <div class="flex justify-between items-center mb-1">
-            <label class="text-xs font-bold text-gray-800">Canal Salinity Reading (ppt)</label>
-            <span id="salVal" class="text-xs font-extrabold px-2 py-0.5 rounded bg-red-100 text-red-800">2.5 ppt (Danger)</span>
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="text-xs font-extrabold text-gray-800">Canal Salinity Reading (ppt)</label>
+              <span id="salVal" class="text-xs font-black px-2.5 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-300">2.5 ppt (Critical Danger)</span>
+            </div>
+            <input id="subSalinity" type="range" min="0.5" max="6.0" step="0.1" value="2.5" oninput="updateSalinityDisplay(this.value)" class="w-full accent-blue-600 cursor-pointer h-2 bg-gray-200 rounded-lg" />
+            <div class="flex justify-between text-[10px] text-gray-500 mt-1 font-semibold">
+              <span class="text-emerald-700">0.5 ppt (Fresh)</span>
+              <span class="text-amber-700 font-bold">1.5 - 1.9 ppt (Warning)</span>
+              <span class="text-red-700 font-bold">2.0+ ppt (Critical Hazard)</span>
+            </div>
           </div>
-          <input id="subSalinity" type="range" min="0.5" max="6.0" step="0.1" value="2.5" oninput="document.getElementById('salVal').innerText = this.value + ' ppt ' + (this.value >= 2.0 ? '(Danger)' : '(Watch)')" class="w-full accent-blue-600" />
-          <div class="flex justify-between text-[10px] text-gray-500 mt-0.5">
-            <span>0.5 ppt (Fresh)</span>
-            <span class="font-bold text-red-600">2.0 ppt (Critical Threshold)</span>
-            <span>6.0 ppt (High Ingress)</span>
+          <div class="pt-2">
+            <label class="block text-xs font-extrabold text-gray-800 mb-1">Estuary Tide Condition</label>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <label class="flex items-center gap-2 p-2 bg-white rounded-xl border border-gray-200 cursor-pointer hover:bg-blue-50">
+                <input type="radio" name="tide_phase" value="rising" checked class="accent-blue-600" />
+                <span class="font-bold text-gray-800">Rising Flood Tide</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 bg-white rounded-xl border border-gray-200 cursor-pointer hover:bg-blue-50">
+                <input type="radio" name="tide_phase" value="ebbing" class="accent-blue-600" />
+                <span class="font-bold text-gray-800">Low Ebb Tide</span>
+              </label>
+            </div>
           </div>
         `;
       } else if (currentReportType === 'bird_deaths') {
         container.innerHTML = `
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-bold text-rose-800 mb-1">Dead Ducks</label>
-              <input id="subDead" type="number" value="18" min="1" class="w-full bg-white border border-rose-300 rounded-lg p-2 text-xs font-bold focus:outline-rose-600" />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="bg-white p-3 rounded-xl border border-rose-200 shadow-sm">
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-xs font-extrabold text-rose-800">Dead Ducks</label>
+                <div class="flex items-center gap-1">
+                  <button type="button" onclick="adjustDuckCount('subDead', -5)" class="px-2 py-0.5 rounded bg-rose-50 hover:bg-rose-100 text-rose-800 font-black text-xs border border-rose-200">-5</button>
+                  <button type="button" onclick="adjustDuckCount('subDead', 5)" class="px-2 py-0.5 rounded bg-rose-50 hover:bg-rose-100 text-rose-800 font-black text-xs border border-rose-200">+5</button>
+                </div>
+              </div>
+              <input id="subDead" type="number" value="18" min="1" class="w-full bg-rose-50/40 border border-rose-300 rounded-lg p-2 text-sm font-extrabold text-rose-900 focus:outline-rose-600" />
             </div>
-            <div>
-              <label class="block text-xs font-bold text-amber-800 mb-1">Sick Ducks</label>
-              <input id="subSick" type="number" value="30" min="0" class="w-full bg-white border border-amber-300 rounded-lg p-2 text-xs font-bold focus:outline-amber-600" />
+            <div class="bg-white p-3 rounded-xl border border-amber-200 shadow-sm">
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-xs font-extrabold text-amber-800">Sick Ducks (Lethargic / Ataxia)</label>
+                <div class="flex items-center gap-1">
+                  <button type="button" onclick="adjustDuckCount('subSick', -5)" class="px-2 py-0.5 rounded bg-amber-50 hover:bg-amber-100 text-amber-800 font-black text-xs border border-amber-200">-5</button>
+                  <button type="button" onclick="adjustDuckCount('subSick', 5)" class="px-2 py-0.5 rounded bg-amber-50 hover:bg-amber-100 text-amber-800 font-black text-xs border border-amber-200">+5</button>
+                </div>
+              </div>
+              <input id="subSick" type="number" value="30" min="0" class="w-full bg-amber-50/40 border border-amber-300 rounded-lg p-2 text-sm font-extrabold text-amber-900 focus:outline-amber-600" />
             </div>
           </div>
         `;
       } else if (currentReportType === 'bund_seepage') {
         container.innerHTML = `
-          <div class="space-y-2">
+          <div class="space-y-3">
             <div>
-              <label class="block text-xs font-bold text-gray-800 mb-1">Seepage Condition</label>
-              <select id="subSeepage" class="w-full bg-white border border-gray-300 rounded-lg p-2 text-xs font-semibold">
-                <option value="active_piping">Active Boiling Piping (Sandbag Emergency)</option>
-                <option value="surface_sweat">Outer Bund Surface Wetting</option>
-                <option value="settlement_crack">Tension Crack on Bund Crest</option>
+              <label class="block text-xs font-extrabold text-gray-800 mb-1">Observed Seepage Condition</label>
+              <select id="subSeepage" class="w-full bg-white border border-gray-300 rounded-xl p-2.5 text-xs font-bold text-gray-800 focus:outline-amber-600 shadow-sm">
+                <option value="active_piping">Active Boiling Piping (Boiling water through sand — Emergency)</option>
+                <option value="surface_sweat">Outer Bund Surface Wetting / Sweat</option>
+                <option value="settlement_crack">Tension Settlement Crack on Bund Crest</option>
               </select>
             </div>
             <div>
-              <label class="block text-xs font-bold text-gray-800 mb-1">Waterhead Difference: 3.5 Feet</label>
-              <input id="subHead" type="range" min="1.0" max="6.0" step="0.5" value="3.5" class="w-full accent-amber-600" />
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-xs font-extrabold text-gray-800">Canal vs Polder Waterhead Level Difference</label>
+                <span id="headVal" class="text-xs font-extrabold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">3.5 Feet</span>
+              </div>
+              <input id="subHead" type="range" min="1.0" max="6.0" step="0.5" value="3.5" oninput="document.getElementById('headVal').innerText = this.value + ' Feet'" class="w-full accent-amber-600 cursor-pointer h-2 bg-gray-200 rounded-lg" />
             </div>
           </div>
         `;
       } else {
         container.innerHTML = `
-          <label class="block text-xs font-bold text-gray-800 mb-1">Affected Area (Acres)</label>
-          <input id="subAcres" type="number" value="2.5" step="0.5" class="w-full bg-white border border-gray-300 rounded-lg p-2 text-xs font-bold" />
+          <div class="space-y-2">
+            <label class="block text-xs font-extrabold text-gray-800">Estimated Affected Area (Acres)</label>
+            <input id="subAcres" type="number" value="2.5" step="0.5" min="0.1" class="w-full bg-white border border-gray-300 rounded-xl p-2.5 text-xs font-bold text-gray-900 focus:outline-purple-600 shadow-sm" />
+            <div class="p-2.5 bg-purple-50 rounded-xl border border-purple-200 text-[11px] text-purple-900 leading-relaxed">
+              <span class="font-bold">AIMS Notice:</span> Under Kerala Government AIMS protocols, statutory crop loss claims must be submitted within 72 hours of tidal submergence or ingress.
+            </div>
+          </div>
         `;
       }
     }
 
+    function useSamplePhoto() {
+      let sampleUrl = 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=600&q=80';
+      if (currentReportType === 'bird_deaths') {
+        sampleUrl = 'https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=600&q=80';
+      }
+      document.getElementById('inputPhoto').value = sampleUrl;
+      handlePhotoInput(sampleUrl);
+    }
+
+    function handlePhotoInput(url) {
+      const container = document.getElementById('photoPreviewContainer');
+      const img = document.getElementById('photoPreviewImg');
+      const caption = document.getElementById('photoPreviewCaption');
+      if (!container || !img) return;
+
+      if (url && url.trim().length > 6) {
+        img.src = url.trim();
+        if (caption) {
+          caption.innerText = currentReportType === 'crop_disease'
+            ? 'BPH Hopperburn Symptoms (Sample Photo)'
+            : 'Field Evidence Sample (Ready for Review)';
+        }
+        container.classList.remove('hidden');
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    function clearPhotoEvidence() {
+      document.getElementById('inputPhoto').value = '';
+      const container = document.getElementById('photoPreviewContainer');
+      if (container) container.classList.add('hidden');
+    }
+
     function triggerVoiceNote() {
-      document.getElementById('inputNotes').value = 'Brown plant hoppers clustered at the stem base of 50-day Uma paddy. Browning circular hopper burn patches visible near the canal inlet.';
+      const btn = document.getElementById('btnVoiceRecord');
+      const btnText = document.getElementById('voiceBtnText');
+      const notesEl = document.getElementById('inputNotes');
+      const badge = document.getElementById('voiceTranscriptionBadge');
+
+      if (btnText) btnText.innerText = 'Listening (Malayalam / English)...';
+      if (btn) btn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-amber-300 text-amber-950 transition border border-amber-400 shadow-md animate-pulse';
+
+      setTimeout(() => {
+        if (notesEl) {
+          notesEl.value = 'Brown plant hoppers clustered at stem base of 50-day Uma paddy. Browning hopper burn circular patches visible near Pulincunnoo canal inlet.';
+        }
+        if (btnText) btnText.innerText = 'Voice Input — Sarvam AI (Recorded)';
+        if (btn) btn.className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-900 transition border border-emerald-300 shadow-sm';
+        if (badge) badge.classList.remove('hidden');
+      }, 750);
+    }
+
+    function viewPinOnLiveMap(lat, lng, reportId) {
+      switchView('map');
+      if (currentMap) {
+        currentMap.setView([lat, lng], 15);
+        setTimeout(() => {
+          if (mapLayers) {
+            mapLayers.eachLayer(layer => {
+              if (layer.getLatLng) {
+                const pos = layer.getLatLng();
+                if (Math.abs(pos.lat - lat) < 0.001 && Math.abs(pos.lng - lng) < 0.001) {
+                  layer.openPopup();
+                }
+              }
+            });
+          }
+        }, 350);
+      }
+    }
+
+    function resetReportForm() {
+      document.getElementById('reportForm').reset();
+      clearPhotoEvidence();
+      document.getElementById('voiceTranscriptionBadge').classList.add('hidden');
+      document.getElementById('actionCardResult').classList.add('hidden');
+      document.getElementById('voiceBtnText').innerText = 'Voice Input — Sarvam AI (Next Step)';
+      document.getElementById('btnVoiceRecord').className = 'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold bg-amber-100 hover:bg-amber-200 text-amber-900 transition border border-amber-300 shadow-sm';
+      setCoords(9.446, 76.458);
+      selectType('crop_disease');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function loadFeed() {
@@ -1122,15 +1503,24 @@
       if (currentReportType === 'crop_disease') {
         details.disease_code = document.getElementById('subDisease').value;
         details.confidence = photoUrl.includes('uncertain') ? 0.55 : 0.94;
+        details.affected_area_acres = parseFloat(document.getElementById('subAcres').value) || 2.0;
       } else if (currentReportType === 'salinity') {
         details.salinity_ppt = parseFloat(document.getElementById('subSalinity').value);
+        const tideChecked = document.querySelector('input[name="tide_phase"]:checked');
+        details.tide_phase = tideChecked ? tideChecked.value : 'rising';
+        details.surface_scum_visible = details.salinity_ppt >= 2.0;
       } else if (currentReportType === 'bird_deaths') {
-        details.dead_count = parseInt(document.getElementById('subDead').value);
-        details.sick_count = parseInt(document.getElementById('subSick').value);
+        details.dead_count = parseInt(document.getElementById('subDead').value) || 1;
+        details.sick_count = parseInt(document.getElementById('subSick').value) || 0;
+        details.flock_size = 1000;
+        details.symptoms = ['sudden_death', 'loss_of_balance', 'cyanosis'];
       } else if (currentReportType === 'bund_seepage') {
         details.seepage_type = document.getElementById('subSeepage').value;
+        details.water_level_diff_feet = parseFloat(document.getElementById('subHead').value) || 3.5;
+        details.bund_length_meters = 15;
       } else {
-        details.affected_area_acres = parseFloat(document.getElementById('subAcres').value);
+        details.affected_area_acres = parseFloat(document.getElementById('subAcres').value) || 2.5;
+        details.cause = 'salinity_or_submergence';
       }
 
       document.getElementById('submitBtn').disabled = true;
@@ -1157,27 +1547,35 @@
         if (rep.action_guidance) {
           const g = rep.action_guidance;
           const cardHtml = `
-            <div class="rounded-2xl overflow-hidden border border-emerald-300 shadow-xl bg-white">
-              <div class="p-5 ${g.alert_level === 'Danger' ? 'bg-rose-700' : 'bg-emerald-700'} text-white">
-                <span class="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-white/20">${g.alert_level} Protocol</span>
-                <h3 class="text-xl font-extrabold mt-1 leading-snug">${g.title}</h3>
-                <p class="text-xs text-white/90 font-medium mt-0.5">${g.title_ml}</p>
+            <div class="rounded-2xl overflow-hidden border border-emerald-300 shadow-xl bg-white animate-in fade-in">
+              <div class="p-5 ${g.alert_level === 'Danger' ? 'bg-rose-700' : (g.alert_level === 'Warning' ? 'bg-amber-700' : 'bg-emerald-700')} text-white">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-white/20 tracking-wider">${g.alert_level} Protocol</span>
+                  <span class="text-[11px] text-white/80 font-bold">Locus: ${lat}, ${lng}</span>
+                </div>
+                <h3 class="text-xl font-extrabold leading-snug">${g.title}</h3>
+                <p class="text-xs text-white/90 font-medium mt-0.5">${g.title_ml || ''}</p>
               </div>
               <div class="p-5 space-y-4 text-xs">
-                <p class="p-3 bg-gray-50 rounded-xl text-gray-800 font-medium leading-relaxed">${g.summary}</p>
+                <p class="p-3.5 bg-gray-50 rounded-xl text-gray-800 font-medium leading-relaxed border border-gray-200">${g.summary}</p>
                 <div>
                   <h4 class="font-extrabold text-gray-900 uppercase text-[11px] mb-2 flex items-center gap-1.5">
-                    <svg class="w-4 h-4 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <svg class="w-4 h-4 text-emerald-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                     <span>Immediate Action Steps:</span>
                   </h4>
                   <ul class="space-y-2 text-gray-700">
-                    ${g.bullet_points.map((pt, i) => `<li class="flex items-start gap-2.5 bg-emerald-50/50 p-2.5 rounded-xl border border-emerald-100"><span class="w-5 h-5 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-[11px] shrink-0">${i+1}</span><span>${pt}</span></li>`).join('')}
+                    ${g.bullet_points.map((pt, i) => `<li class="flex items-start gap-2.5 bg-emerald-50/50 p-3 rounded-xl border border-emerald-100"><span class="w-5 h-5 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">${i+1}</span><span class="leading-relaxed font-medium">${pt}</span></li>`).join('')}
                   </ul>
                 </div>
-                ${g.citation ? `<p class="text-[11px] text-gray-500 bg-gray-50 p-2.5 rounded-xl border border-gray-200"><b>Citation:</b> ${g.citation}</p>` : ''}
-                <div class="flex items-center gap-2 pt-2">
-                  <button onclick="switchView('map')" class="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3 px-4 rounded-xl text-xs shadow transition text-center">View On Live Map →</button>
-                  <button onclick="document.getElementById('actionCardResult').classList.add('hidden')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-xl text-xs transition">Dismiss</button>
+                ${g.citation ? `<p class="text-[11px] text-gray-600 bg-gray-50 p-2.5 rounded-xl border border-gray-200"><b>Official Citation:</b> ${g.citation}</p>` : ''}
+                <div class="flex flex-col sm:flex-row items-center gap-2 pt-2">
+                  <button type="button" onclick="viewPinOnLiveMap(${lat}, ${lng}, '${rep.id}')" class="w-full sm:flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3.5 px-4 rounded-xl text-xs sm:text-sm shadow transition text-center flex items-center justify-center gap-2">
+                    <span>View Pin on Live Map</span>
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                  </button>
+                  <button type="button" onclick="resetReportForm()" class="w-full sm:w-auto bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3.5 px-4 rounded-xl text-xs sm:text-sm transition">
+                    Submit Another Report
+                  </button>
                 </div>
               </div>
             </div>
