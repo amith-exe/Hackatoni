@@ -14,6 +14,7 @@ import {
   LogIn,
   HelpCircle,
   Phone,
+  ScanLine,
 } from 'lucide-react';
 import { useDemoUser } from '@/lib/demo-user';
 import HowItWorksModal from '@/components/Modals/HowItWorksModal';
@@ -28,6 +29,7 @@ export function Navbar() {
 
   const navLinks = [
     { href: '/', labelKey: 'liveMap' as const, icon: Map },
+    { href: '/scan', labelKey: 'leafScan' as const, icon: ScanLine },
     { href: '/report', labelKey: 'reportIssue' as const, icon: FilePlus2 },
     { href: '/verify', labelKey: 'verifyQueue' as const, icon: CheckCircle2 },
     { href: '/alerts', labelKey: 'alertsInbox' as const, icon: Bell, hasBadge: true },

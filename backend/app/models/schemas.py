@@ -74,6 +74,12 @@ class RemediesKAUResponse(BaseModel):
     source_citation: str
     last_checked: date
 
+class LeafDiagnosisSchema(BaseModel):
+    disease_code: Literal["brown_planthopper", "sheath_blight", "bacterial_leaf_blight", "rice_blast", "sheath_rot", "brown_leaf_spot", "rice_tungro", "unknown"]
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    visual_observations: List[str] = Field(..., min_length=2, max_length=3)
+    image_quality_note: str
+
 class OutbreakBreakdownItem(BaseModel):
     disease_code: Optional[str] = None
     threat_code: Optional[str] = None

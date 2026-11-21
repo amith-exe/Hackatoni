@@ -173,6 +173,11 @@ function HomeContent() {
 
       {/* Main Map Container */}
       <div className="relative flex-1 w-full h-full">
+        {!showTrendPanel && (
+          <button onClick={() => setShowTrendPanel(true)} className="absolute top-3 right-3 z-[500] flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-xs font-extrabold text-white shadow-xl hover:bg-emerald-800">
+            <SlidersHorizontal className="w-4 h-4" /> Filters &amp; Find Trend
+          </button>
+        )}
         {data && (
           <KuttanadMap
             reports={mapReports}

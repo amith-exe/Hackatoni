@@ -3,6 +3,7 @@ import { Language } from '@/types';
 
 export const translations = {
   en: {
+    leafScan: 'Leaf Scan',
     // Top Bar & Navigation
     networkName: 'Kuttanad Polder Early-Warning Network',
     tagline: 'Community-Verified Agro-Hydrology Platform',
@@ -150,6 +151,7 @@ export const translations = {
     closeBtn: 'Close',
   },
   ml: {
+    leafScan: 'ഇല സ്കാൻ',
     // Top Bar & Navigation
     networkName: 'കുട്ടനാട് നെല്ല് - താറാവ് മുൻകരുതൽ നെറ്റ്‌വർക്ക്',
     tagline: 'കർഷക പരിശോധന അടിസ്ഥാനമാക്കിയുള്ള കാർഷിക മുന്നറിയിപ്പ് പ്ലാറ്റ്ഫോം',

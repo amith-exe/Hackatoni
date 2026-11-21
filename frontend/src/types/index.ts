@@ -100,6 +100,15 @@ export interface TrendAnalysis {
   recommended_actions: string[];
 }
 
+export interface LeafDiagnosisResult {
+  status: 'diagnosed' | 'uncertain';
+  message: string;
+  diagnosis: { disease_code: string; confidence: number; visual_observations: string[]; image_quality_note: string };
+  remedy?: { disease_code: string; disease_name_en: string; disease_name_ml: string; immediate_actions: string[]; spray_guidance: string; source_citation: string } | null;
+  nearby_reports_count?: number | null;
+  nearest_canal_name?: string | null;
+}
+
 export interface AlertItem {
   id: string;
   category: 'salinity' | 'cluster' | 'verification';

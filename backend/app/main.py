@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from backend.app.config import settings
-from backend.app.routers import reports, map_feed, officer, remedies, alerts, trends
+from backend.app.routers import reports, map_feed, officer, remedies, alerts, trends, vision
 from backend.app.services.db import db
 
 app = FastAPI(
@@ -36,6 +36,7 @@ app.include_router(officer.router, prefix=settings.API_V1_STR)
 app.include_router(remedies.router, prefix=settings.API_V1_STR)
 app.include_router(alerts.router, prefix=settings.API_V1_STR)
 app.include_router(trends.router, prefix=settings.API_V1_STR)
+app.include_router(vision.router, prefix=settings.API_V1_STR)
 
 # Static files and root UI
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")

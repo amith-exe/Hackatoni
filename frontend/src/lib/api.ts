@@ -1,5 +1,5 @@
 // frontend/src/lib/api.ts
-import { MapFeedData, ReportItem, UserProfile, AlertItem, LocalTrendData, TrendAnalysis } from '@/types';
+import { MapFeedData, ReportItem, UserProfile, AlertItem, LocalTrendData, TrendAnalysis, LeafDiagnosisResult } from '@/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL 
   ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`
@@ -17,6 +17,20 @@ export async function fetchMapFeed(filters?: Record<string, string | number>): P
 export async function analyzeTrend(payload: { lat: number; lng: number; radius_km: number; dbscan_eps_km: number; days: number }): Promise<TrendAnalysis> {
   const res = await fetch(`${API_BASE}/trends/analyze`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
   if (!res.ok) throw new Error('Trend analysis failed');
+  return res.json();
+}
+
+export async function diagnoseLeaf(payload: { file?: File; sampleId?: string; lat?: number; lng?: number }): Promise<LeafDiagnosisResult> {
+  let res: Response;
+  if (payload.file) {
+    const form = new FormData(); form.append('file', payload.file);
+    if (payload.lat !== undefined) form.append('lat', String(payload.lat));
+    if (payload.lng !== undefined) form.append('lng', String(payload.lng));
+    res = await fetch(`${API_BASE}/vision/diagnose`, { method: 'POST', body: form });
+  } else {
+    res = await fetch(`${API_BASE}/vision/diagnose`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sample_id: payload.sampleId, lat: payload.lat, lng: payload.lng }) });
+  }
+  if (!res.ok) { const error = await res.json().catch(() => ({ detail: 'Leaf diagnosis failed' })); throw new Error(error.detail || 'Leaf diagnosis failed'); }
   return res.json();
 }
 

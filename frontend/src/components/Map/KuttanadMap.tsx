@@ -144,6 +144,14 @@ export default function KuttanadMap({
         });
 
         mapInstanceRef.current = map;
+        // Prefer the user's current location; Kuttanad remains the safe default.
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => map.setView([position.coords.latitude, position.coords.longitude], 12),
+            () => map.setView([defaultCenter[0], defaultCenter[1]], defaultZoom),
+            { enableHighAccuracy: false, timeout: 3500, maximumAge: 300000 }
+          );
+        }
       }
     }
 
@@ -416,6 +424,14 @@ export default function KuttanadMap({
     }
   };
 
+  const fitToVisibleData = async () => {
+    if (!mapInstanceRef.current) return;
+    const L = (await import('leaflet')).default;
+    const points: [number, number][] = reports.map((r) => [r.latitude, r.longitude]);
+    canals.forEach((c) => c.coordinates.forEach(([lng, lat]) => points.push([lat, lng])));
+    if (points.length) mapInstanceRef.current.fitBounds(L.latLngBounds(points as any), { padding: [36, 36], maxZoom: 12, animate: true });
+  };
+
   return (
     <div className="relative w-full h-full min-h-[500px] flex flex-col">
       {/* Pin-to-Report Friendly Hint Bar */}
@@ -487,6 +503,9 @@ export default function KuttanadMap({
 
         {/* Filter Pills */}
         <div className="flex flex-wrap gap-1 bg-white/95 backdrop-blur p-1 rounded-xl shadow-md border border-gray-200">
+          <button onClick={fitToVisibleData} className="px-2 py-1 rounded-lg text-xs font-bold text-blue-700 hover:bg-blue-50 flex items-center gap-1" title="Show all visible data on the map">
+            <MapPin className="w-3.5 h-3.5" /><span className="hidden md:inline">Show All Data</span>
+          </button>
           <button
             onClick={() => setFilterType('all')}
             className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${

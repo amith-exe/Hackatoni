@@ -28,7 +28,7 @@ def build_outbreak_breakdown(reports):
         growth = round(((len(current)-len(previous))/len(previous))*100, 1) if previous else (100.0 if current else 0.0)
         spread = "spreading" if growth > 20 and current else ("active_cluster" if clusters else ("watch" if current else "isolated"))
         if current or previous:
-            items.append(OutbreakBreakdownItem(disease_code=code if code in DISEASES else None, threat_code=code if code not in DISEASES else None, label=label, current_7d_count=len(current), previous_7d_count=len(previous), growth_pct=growth, spread_status=spread, cluster_count=len(clusters), center=center, affected_areas=sorted({r.get("canal_name") or "Kuttanad sector" for r in current})))
+            items.append(OutbreakBreakdownItem(disease_code=code if code in DISEASES else None, threat_code=code if code not in DISEASES else None, label=label, current_7d_count=len(current), previous_7d_count=len(previous), growth_pct=growth, spread_status=spread, cluster_count=len(clusters), center=center, affected_areas=sorted({r.get("details", {}).get("location_label") or r.get("canal_name") or "Kuttanad sector" for r in current})))
     return sorted(items, key=lambda x: (x.current_7d_count, x.growth_pct), reverse=True)
 
 @router.get("", response_model=MapFeedResponse)

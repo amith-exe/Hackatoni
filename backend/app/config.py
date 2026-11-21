@@ -1,6 +1,9 @@
  # backend/app/config.py
 import os
 os.environ.setdefault("LOKY_MAX_CPU_COUNT", "4")
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+load_dotenv()
 
 from pydantic import BaseModel
 
@@ -12,6 +15,7 @@ class Settings(BaseModel):
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
     SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     
     # DBSCAN spatial clustering defaults
     # For Kuttanad delta, 2.0 km groups neighboring padasekharams
