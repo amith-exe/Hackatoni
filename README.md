@@ -10,7 +10,28 @@ Karshakan Lens is a mobile-first PWA for Kuttanad farmers and Krishi Bhavan offi
 
 The platform turns a local observation into a spatially aware warning, a vetted agronomic action, and a trusted community record.
 
-## The Kuttanad Problem
+## Solution First: Stop Crop Disease Outbreaks Early
+
+**PadamGuardian / Karshakan Lens solves Alappuzha's crop-outbreak visibility problem by turning scattered farmer observations into trusted, map-based outbreak intelligence.** A farmer uploads a leaf, drops a GPS pin, or reports a field issue. The system diagnoses or classifies the observation, snaps it to the nearest canal/padasekharam, compares current and previous activity, and shows whether nearby reports form a growing outbreak.
+
+The solution combines Gemini Vision, curated KAU remedies, community verification, canal-aware context, and **Haversine DBSCAN**. DBSCAN is the core engine that distinguishes a real disease outbreak from isolated reports and shows where the outbreak is spreading.
+
+## Primary Problem: Crop Disease Outbreaks in Alappuzha
+
+Alappuzha's Kuttanad farming belt is a connected disease-spread environment. Paddy plots are packed into embanked *padasekharams*, humidity remains high, and farmers often see the first symptoms days before a field inspection reaches every polder. Brown Planthopper (*chazhi*), hopperburn, Sheath Blight, Bacterial Leaf Blight, Rice Blast, Sheath Rot, Brown Leaf Spot, Rice Tungro, Stem Borer, Leaf Folder, Gall Midge, Hispa, False Smut, and Grain Discoloration can spread across neighboring fields quickly.
+
+The practical problem is not only diagnosis. It is knowing when several observations represent the same outbreak, where it is moving, and which farmers or officers need to act first.
+
+### How the platform solves the outbreak problem
+
+- **Field signal:** `/scan` accepts a real leaf photo and returns a structured disease code, confidence, visual observations, and image quality.
+- **Safety boundary:** confidence below 0.70 returns `Not sure — ask your Krishi Bhavan` with no chemical spray advice.
+- **Trusted action:** confident results use a disease-code lookup in the curated KAU remedy registry; Gemini does not invent dosages.
+- **Spatial intelligence:** current reports are grouped by disease and location with Haversine DBSCAN.
+- **Human validation:** reports become `community_confirmed` after two unique peer confirmations and can then be officially verified.
+- **Decision view:** the Live Map and “What's Spreading Now” panel show current versus previous counts, cluster centers, affected areas, and actions.
+
+## Kuttanad's Connected Crises
 
 Kuttanad spans Alappuzha and Kottayam districts of Kerala and is widely known for below-sea-level farming. Paddy is cultivated inside embanked polders called *padasekharams*, often around 1.5–2.5 metres below sea level, with interconnected canals and Vembanad Lake controlling the water system.
 
@@ -46,7 +67,7 @@ Kuttanad spans Alappuzha and Kottayam districts of Kerala and is widely known fo
 
    **Solution:** `crop_loss` reports preserve coordinates, timestamps, notes, and structured loss details for officer review, with deterministic AIMS/PMFBY evidence guidance.
 
-## Why DBSCAN Fits Kuttanad
+## Why DBSCAN Is the Core Outbreak Algorithm
 
 DBSCAN (Density-Based Spatial Clustering of Applications with Noise) uses geographic Haversine distance. The interactive trend endpoint uses a 7-day current window, a prior comparison window, requested `eps` (default 2.0 km), and `min_samples=3`. The map feed uses configured overview defaults.
 
