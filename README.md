@@ -176,27 +176,15 @@ Place final screenshots in `docs/screenshots/` using the filenames below. These 
 ### 2. Filters and visible-layer controls
 
 <!-- Screenshot placeholder: Filters & Find Trend panel showing category, disease, verification, time-window, and Reports/Clusters/Canals toggles. -->
-![Filters and visible layers](docs/screenshots/02-filters-and-layers.png)
+<img width="1510" height="677" alt="image" src="https://github.com/user-attachments/assets/1aab7c91-2979-477b-ba6d-173c9f046846" />
+
 
 ### 3. Multi-location DBSCAN trend analysis
 
 <!-- Screenshot placeholder: selected location, 3 km ring, highlighted cluster, cluster/noise counts, current-vs-prior counts, and canal status. -->
-![DBSCAN trend analysis](docs/screenshots/03-dbscan-trend-analysis.png)
+<img width="436" height="593" alt="image" src="https://github.com/user-attachments/assets/0fca41b8-d68f-48a9-b82a-a3476f21a0aa" />
 
-### 4. Gemini Leaf Scan result
 
-<!-- Screenshot placeholder: real demo leaf image, disease name, confidence, visual clues, and vetted KAU action plan. -->
-![Gemini leaf diagnosis](docs/screenshots/04-gemini-leaf-scan.png)
-
-### 5. Uncertain diagnosis safety state
-
-<!-- Screenshot placeholder: blurry sample showing “Not sure — ask your Krishi Bhavan” and no chemical advice. -->
-![Uncertain diagnosis safety state](docs/screenshots/05-uncertain-safety-state.png)
-
-### 6. Report and trust verification lifecycle
-
-<!-- Screenshot placeholder: submitted map report, Verify Queue confirmation state, and officer verification view. -->
-![Report and trust verification](docs/screenshots/06-trust-verification.png)
 
 ### Screenshot capture guidance
 
