@@ -227,6 +227,14 @@ Place final screenshots in `docs/screenshots/` using the filenames below. These 
 <!-- Screenshot placeholder: selected location, 3 km ring, highlighted cluster, cluster/noise counts, current-vs-prior counts, and canal status. -->
 <img width="436" height="593" alt="image" src="https://github.com/user-attachments/assets/0fca41b8-d68f-48a9-b82a-a3476f21a0aa" />
 
+### Report Issue
+<img width="1535" height="737" alt="image" src="https://github.com/user-attachments/assets/be862d72-84b1-4281-9889-bca372712a83" />
+
+<img width="1530" height="710" alt="image" src="https://github.com/user-attachments/assets/cc257c82-a425-41b5-88ee-124a7d4d4d02" />
+
+## Alerts from near by place 
+
+<img width="1521" height="713" alt="image" src="https://github.com/user-attachments/assets/e1d117f9-d8be-4111-b87e-a865e1e402a6" />
 
 ### Capture Tips
 
