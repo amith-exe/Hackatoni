@@ -14,30 +14,32 @@ Karshakan Lens is a mobile-first PWA for Kuttanad farmers and Krishi Bhavan offi
 
 The platform turns a local observation into a spatially aware warning, a vetted agronomic action, and a trusted community record.
 
+**In one sentence:** farmers can detect nearby crop-disease hotspots earlier, understand where they are spreading, and receive safe KAU-backed actions before losses become widespread.
+
 ## Solution
 
 **PadamGuardian / Karshakan Lens solves Alappuzha's crop-outbreak visibility problem by turning scattered farmer observations into trusted, map-based outbreak intelligence.** A farmer uploads a leaf, drops a GPS pin, or reports a field issue. The system diagnoses or classifies the observation, snaps it to the nearest canal/padasekharam, compares current and previous activity, and shows whether nearby reports form a growing outbreak.
 
-The solution combines Gemini Vision, curated KAU remedies, community verification, canal-aware context, and **Haversine DBSCAN**. DBSCAN is the core engine that distinguishes a real disease outbreak from isolated reports and shows where the outbreak is spreading.
+The solution combines Gemini Vision, curated KAU remedies, community verification, canal-aware context, and **Haversine DBSCAN**. DBSCAN is the early-warning engine that identifies potential disease-outbreak hotspots, separates them from isolated reports, and shows where activity may be spreading.
 
 ## Main Problem: Crop Disease Outbreaks
 
-Alappuzha's Kuttanad farming belt is a connected disease-spread environment. Paddy plots are packed into embanked *padasekharams*, humidity remains high, and farmers often see the first symptoms days before a field inspection reaches every polder. Brown Planthopper (*chazhi*), hopperburn, Sheath Blight, Bacterial Leaf Blight, Rice Blast, Sheath Rot, Brown Leaf Spot, Rice Tungro, Stem Borer, Leaf Folder, Gall Midge, Hispa, False Smut, and Grain Discoloration can spread across neighboring fields quickly.
+Alappuzha's Kuttanad farming belt is a connected disease-spread environment. Paddy plots are packed into embanked *padasekharams*, humidity remains high, and farmers often see the first symptoms days before a field inspection reaches every polder. The current curated remedy catalog covers seven common diseases: Brown Planthopper (*chazhi*), Sheath Blight, Bacterial Leaf Blight, Rice Blast, Sheath Rot, Brown Leaf Spot, and Rice Tungro. The catalog can be expanded later with other locally observed pests and diseases.
 
 The practical problem is not only diagnosis. It is knowing when several observations represent the same outbreak, where it is moving, and which farmers or officers need to act first.
 
 ### How It Works
 
 - **Field signal:** `/scan` accepts a real leaf photo and returns a structured disease code, confidence, visual observations, and image quality.
-- **Safety boundary:** confidence below 0.70 returns `Not sure — ask your Krishi Bhavan` with no chemical spray advice.
+- **Safety boundary:** confidence below 0.70 returns `Not sure - ask your Krishi Bhavan` with no chemical spray advice.
 - **Trusted action:** confident results use a disease-code lookup in the curated KAU remedy registry; Gemini does not invent dosages.
 - **Spatial intelligence:** current reports are grouped by disease and location with Haversine DBSCAN.
 - **Human validation:** reports become `community_confirmed` after two unique peer confirmations and can then be officially verified.
-- **Decision view:** the Live Map and “What's Spreading Now” panel show current versus previous counts, cluster centers, affected areas, and actions.
+- **Decision view:** the Live Map and `What's Spreading Now` panel show current versus previous counts, cluster centers, affected areas, and actions.
 
 ## Other Alappuzha Problems
 
-Kuttanad spans Alappuzha and Kottayam districts of Kerala and is widely known for below-sea-level farming. Paddy is cultivated inside embanked polders called *padasekharams*, often around 1.5–2.5 metres below sea level, with interconnected canals and Vembanad Lake controlling the water system.
+Kuttanad spans Alappuzha and Kottayam districts of Kerala and is widely known for below-sea-level farming. Paddy is cultivated inside embanked polders called *padasekharams*, often around 1.5-2.5 metres below sea level, with interconnected canals and Vembanad Lake controlling the water system.
 
 Alappuzha combines lowland paddy fields, backwaters, canals, embanked farms, livestock, and coastal water systems. The Kuttanad belt is one important part of the district; these wider agricultural and environmental risks affect farmers across Alappuzha.
 
@@ -51,9 +53,9 @@ Alappuzha combines lowland paddy fields, backwaters, canals, embanked farms, liv
 
 2. **Rapid pest and fungal epidemics**
 
-   Brown Planthopper (*chazhi*), Sheath Blight, Bacterial Leaf Blight, Rice Blast, Sheath Rot, Brown Leaf Spot, Rice Tungro, Stem Borer, Leaf Folder, Gall Midge, Hispa, False Smut, and Grain Discoloration can spread through humid contiguous fields.
+   The seven currently supported diseases - Brown Planthopper (*chazhi*), Sheath Blight, Bacterial Leaf Blight, Rice Blast, Sheath Rot, Brown Leaf Spot, and Rice Tungro - can spread through humid contiguous fields. Other disease and pest categories are reserved for future catalog expansion.
 
-   **Solution:** Gemini Vision diagnoses leaf images, confidence below 0.70 becomes `Not sure — ask your Krishi Bhavan`, confident diagnoses use deterministic KAU Package of Practices guidance, and recent reports are grouped with Haversine DBSCAN.
+   **Solution:** Gemini Vision diagnoses leaf images, confidence below 0.70 becomes `Not sure - ask your Krishi Bhavan`, confident diagnoses use deterministic KAU Package of Practices guidance, and recent reports are grouped with Haversine DBSCAN.
 
 3. **Outer ring-bund seepage (*madaveezhcha*) and piping breaches**
 
@@ -101,21 +103,21 @@ Users can choose a GPS point, map point, or padasekharam preset, run `POST /api/
 
 ```text
 AI leaf diagnosis or field report
-              ↓
+              v
 Haversine DBSCAN hotspot detection
-              ↓
+              v
 Potential crop-disease outbreak cluster
-              ↓
+              v
 Community confirmation
-              ↓
+              v
 Krishi Bhavan officer verification
-              ↓
+              v
 Trusted outbreak alert and KAU action plan
 ```
 
-The key judge-facing justification is: **“We are not using DBSCAN just because it is an ML algorithm. The concept of an outbreak is inherently a density problem: multiple related observations concentrated in a geographic region should become a hotspot, while isolated observations should not automatically trigger an alarm.”**
+The key judge-facing justification is: **"We are not using DBSCAN just because it is an ML algorithm. The concept of an outbreak is inherently a density problem: multiple related observations concentrated in a geographic region should become a hotspot, while isolated observations should not automatically trigger an alarm."**
 
-DBSCAN does not prove that a biological outbreak exists. It identifies spatially dense report clusters for prioritised investigation; the trust workflow and officer verification determine whether the signal becomes a trusted alert.
+DBSCAN does not prove that a biological outbreak exists. It identifies spatially dense report clusters for prioritised investigation; community confirmation and officer verification determine whether the signal becomes a trusted alert.
 
 ## User Flows
 
@@ -198,9 +200,9 @@ The running demo currently uses `InMemoryDatabase` in `backend/app/services/db.p
 
 ## Documentation
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) — detailed Mermaid system architecture, request paths, runtime modules, and deployment boundaries.
-- [DB.md](DB.md) — Mermaid entity-relationship model, PostGIS spatial design, privacy boundaries, indexes, and trust integrity.
-- [WORKFLOW.md](WORKFLOW.md) — detailed crop-outbreak, DBSCAN, salinity, multi-location trend, and trust-verification workflows.
+- [ARCHITECTURE.md](ARCHITECTURE.md) - detailed Mermaid system architecture, request paths, runtime modules, and deployment boundaries.
+- [DB.md](DB.md) - Mermaid entity-relationship model, PostGIS spatial design, privacy boundaries, indexes, and trust integrity.
+- [WORKFLOW.md](WORKFLOW.md) - detailed crop-outbreak, DBSCAN, salinity, multi-location trend, and trust-verification workflows.
 
 Use these three guides alongside this README: the README explains the product and judge story, `ARCHITECTURE.md` explains component relationships, `DB.md` explains data ownership and spatial storage, and `WORKFLOW.md` explains how a field observation becomes a verified action.
 
@@ -210,7 +212,7 @@ Place final screenshots in `docs/screenshots/` using the filenames below. These 
 
 ### Live Map
 
-<!-- Screenshot placeholder: Live Map showing Kuttanad pins, canals, DBSCAN circles, telemetry, and the “Show All Data” control. -->
+<!-- Screenshot placeholder: Live Map showing Kuttanad pins, canals, DBSCAN circles, telemetry, and the "Show All Data" control. -->
 <img width="1535" height="751" alt="image" src="https://github.com/user-attachments/assets/24c7ca99-e10c-4e48-aa65-9bae32c12076" />
 
 
@@ -228,7 +230,7 @@ Place final screenshots in `docs/screenshots/` using the filenames below. These 
 
 ### Capture Tips
 
-- Use a clean 1440×900 or 1280×800 browser viewport.
+- Use a clean 1440x900 or 1280x800 browser viewport.
 - Capture the app only; exclude browser tabs, API keys, phone numbers, and personal GPS details.
 - Prefer one screenshot per capability, with the important panel fully visible.
 - For the strongest demo set, capture Pulincunnoo, Alappuzha, Kumarakom, or Palakkad as the selected trend location.
@@ -263,7 +265,7 @@ Responses include confidence, visual observations, image quality, nearby report 
 
 The scanner includes three offline samples plus the real `frontend/demo data/image.png` asset. The real demo image has been tested through the Gemini upload path and returned a Rice Blast result with a KAU action plan.
 
-### Sarvam Status
+### Sarvam Status (Planned Integration)
 
 The product design reserves `saaras:v3`/`saarika:v2.5` STT and `bulbul:v3`/`bulbul:v2` TTS for Malayalam `ml-IN` voice notes and spoken action plans. Sarvam is not currently wired as a live SDK, router, or dependency in this repository. The current safe path is typed notes, scanner observations, curated KAU text, and the EN/ML UI toggle.
 
