@@ -103,18 +103,18 @@ DBSCAN (Density-Based Spatial Clustering of Applications with Noise) uses geogra
 ```mermaid
 flowchart TD
   Input[Map click / GPS / Leaf Scan / future Malayalam voice note] --> API[POST /api/reports or /api/vision/diagnose]
-  API --> Snap[Nearest canal snap\nHaversine / PostGIS ST_Distance equivalent]
+  API --> Snap["Nearest canal snap<br/>Haversine / PostGIS ST_Distance equivalent"]
   Snap --> Branch{Incident branch}
-  Branch --> Disease[Crop Disease\nGemini + KAU remedy + DBSCAN]
-  Branch --> Salinity[Salinity\nOpen-Meteo + upstream canal graph]
-  Branch --> Duck[Duck deaths\nDeterministic biosecurity rules]
-  Branch --> Other[Bund / Crop Loss\nSafety and AIMS checklists]
-  Disease --> Public[Anonymized public response\nreporter_id, names, phone stripped]
+  Branch --> Disease["Crop Disease<br/>Gemini + KAU remedy + DBSCAN"]
+  Branch --> Salinity["Salinity<br/>Open-Meteo + upstream canal graph"]
+  Branch --> Duck["Duck deaths<br/>Deterministic biosecurity rules"]
+  Branch --> Other["Bund / Crop Loss<br/>Safety and AIMS checklists"]
+  Disease --> Public["Anonymized public response<br/>reporter_id, names, phone stripped"]
   Salinity --> Public
   Duck --> Public
   Other --> Public
   Public --> Unconfirmed[unconfirmed]
-  Unconfirmed --> Confirmed[community_confirmed\nafter 2+ unique peer confirmations]
+  Unconfirmed --> Confirmed["community_confirmed<br/>after 2+ unique peer confirmations"]
   Confirmed --> Officer{Officer decision}
   Unconfirmed --> Officer
   Officer --> Verified[officially_verified]
@@ -126,16 +126,16 @@ flowchart TD
 ```mermaid
 flowchart LR
   subgraph Frontend[Next.js 14 PWA]
-    UI[TypeScript + Tailwind + lucide-react\nEN / ML translation]
-    Map[Leaflet\nOSM HOT / OSM / Esri Satellite]
-    Views[Live Map | Leaf Scan | Report\nVerify Queue | Alerts]
+    UI["TypeScript + Tailwind + lucide-react<br/>EN / ML translation"]
+    Map["Leaflet<br/>OSM HOT / OSM / Esri Satellite"]
+    Views["Live Map | Leaf Scan | Report<br/>Verify Queue | Alerts"]
     UI --> Map
     UI --> Views
   end
   subgraph Backend[FastAPI REST Backend]
     API[REST /api]
-    Trust[Report branching\nTrust state machine]
-    Gemini[Gemini Vision router\nKAU remedy lookup]
+    Trust["Report branching<br/>Trust state machine"]
+    Gemini["Gemini Vision router<br/>KAU remedy lookup"]
     DBSCAN[Haversine DBSCAN engine]
     Canal[Canal graph + Open-Meteo router]
     API --> Trust
@@ -144,8 +144,8 @@ flowchart LR
     API --> Canal
   end
   subgraph Data[Data layer]
-    Runtime[(InMemoryDatabase\ncurrent demo runtime)]
-    PostGIS[(PostgreSQL + PostGIS\nSupabase migrations / production target)]
+    Runtime[("InMemoryDatabase<br/>current demo runtime")]
+    PostGIS[("PostgreSQL + PostGIS<br/>Supabase migrations / production target")]
   end
   Frontend -->|JSON REST| API
   Trust --> Runtime

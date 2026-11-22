@@ -6,17 +6,17 @@
 flowchart LR
   Farmer[Farmer / Mobile PWA]
   Officer[Krishi Bhavan Officer]
-  UI[Next.js 14 App Router\nTypeScript + Tailwind + lucide-react\nEN / ML toggle]
-  Map[Leaflet Live Map\nOSM HOT / OSM / Esri]
+  UI["Next.js 14 App Router<br/>TypeScript + Tailwind + lucide-react<br/>EN / ML toggle"]
+  Map["Leaflet Live Map<br/>OSM HOT / OSM / Esri"]
   API[FastAPI REST API]
   Reports[Report + Trust Router]
-  Vision[Gemini Vision Router\nStructured Leaf Diagnosis]
-  Trend[DBSCAN Trend Engine\nHaversine distance]
-  Canal[Canal Graph Router\nSalinity propagation]
+  Vision["Gemini Vision Router<br/>Structured Leaf Diagnosis"]
+  Trend["DBSCAN Trend Engine<br/>Haversine distance"]
+  Canal["Canal Graph Router<br/>Salinity propagation"]
   Safety[Deterministic Safety + KAU Guidance]
   Weather[Open-Meteo Rainfall]
-  Store[(InMemoryDatabase\nproduction target: PostgreSQL/PostGIS)]
-  SQL[(Supabase/PostGIS\n001 schema + 002 seeds)]
+  Store[("InMemoryDatabase<br/>production target: PostgreSQL/PostGIS")]
+  SQL[("Supabase/PostGIS<br/>001 schema + 002 seeds")]
 
   Farmer --> UI
   Officer --> UI
