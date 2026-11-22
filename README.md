@@ -1,3 +1,7 @@
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/b3a57815-4456-4596-b21c-8fafc11b5cda" />
+
+
+
 # PadamGuardian / Karshakan Lens
 
 ## Overview
@@ -221,20 +225,6 @@ Place final screenshots in `docs/screenshots/` using the filenames below. These 
 <!-- Screenshot placeholder: selected location, 3 km ring, highlighted cluster, cluster/noise counts, current-vs-prior counts, and canal status. -->
 <img width="436" height="593" alt="image" src="https://github.com/user-attachments/assets/0fca41b8-d68f-48a9-b82a-a3476f21a0aa" />
 
-### Leaf Scan
-
-<!-- Screenshot placeholder: real demo leaf image, disease name, confidence, visual clues, and vetted KAU action plan. -->
-![Gemini leaf diagnosis](docs/screenshots/04-gemini-leaf-scan.png)
-
-### Safety State
-
-<!-- Screenshot placeholder: blurry sample showing “Not sure — ask your Krishi Bhavan” and no chemical advice. -->
-![Uncertain diagnosis safety state](docs/screenshots/05-uncertain-safety-state.png)
-
-### Verification
-
-<!-- Screenshot placeholder: submitted map report, Verify Queue confirmation state, and officer verification view. -->
-![Report and trust verification](docs/screenshots/06-trust-verification.png)
 
 ### Capture Tips
 
@@ -356,17 +346,7 @@ These create the six core tables, spatial indexes, canal seed graph, KAU remedie
 - OpenStreetMap/Esri and Open-Meteo are external services; fallback data keeps core demo flows usable.
 - Production hardening should connect PostGIS, add authenticated role claims, restrict CORS, wire Sarvam, and replace deterministic classifier fallbacks with an audited model/service.
 
-## Demo Plan
 
-1. Open the Live Map and click **Show All Data**.
-2. Open **Filters & Find Trend** and show the `24 Hours / 7 Days / 14 Days`, category, disease, verification, and visible-layer controls.
-3. Select Pulincunnoo and run DBSCAN. Explain clustered reports versus isolated noise and the 3 km analysis ring.
-4. Repeat at Alappuzha, Kumarakom, Thrissur Kole, or Palakkad to show different disease clusters.
-5. Open `/scan`, choose **Demo Data Folder: Rice Leaf Photo**, and run Gemini Vision.
-6. Show the structured Rice Blast result, visual clues, KAU plan, nearest canal, and nearby report count.
-7. Click **Report This Issue to Live Map**, return to `/`, and show the anonymized pin.
-8. Switch persona to a neighboring farmer, confirm the report twice, then switch to the officer and verify it.
-9. Finish with the salinity story: the alert propagates along connected canals and uses rainfall dilution rather than a misleading point-radius alert.
 
 **Core thesis:** PadamGuardian connects place, people, and practical agronomy before a local warning becomes a regional loss.
 
