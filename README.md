@@ -1,5 +1,4 @@
 
-<img width="1024" height="572" alt="image" src="https://github.com/user-attachments/assets/a252c20a-92ca-4d57-8dba-a162e0d81bca" />
 
 
 # PadamGuardian / Karshakan Lens
