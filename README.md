@@ -71,12 +71,47 @@ Alappuzha combines lowland paddy fields, backwaters, canals, embanked farms, liv
 
 ## Why DBSCAN
 
-DBSCAN (Density-Based Spatial Clustering of Applications with Noise) uses geographic Haversine distance. The interactive trend endpoint uses a 7-day current window, a prior comparison window, requested `eps` (default 2.0 km), and `min_samples=3`. The map feed uses configured overview defaults.
+DBSCAN is used because a crop outbreak is fundamentally a **density problem**, not simply an ML demonstration. We want to discover whether multiple related reports are concentrated in a geographic area, while keeping isolated observations as noise until they are verified. DBSCAN identifies potential outbreak hotspots; community confirmation and Krishi Bhavan review remain the trust decision.
 
-- **Irregular geography:** fields follow canals, bunds, and winding waterways rather than square grid cells.
-- **Noise filtering:** isolated reports remain noise rather than causing a false regional alarm.
-- **No cluster-count guess:** unlike K-Means, DBSCAN does not require a predetermined number of outbreaks.
-- **Interactive comparison:** users can choose a GPS point, map point, or padasekharam preset, run `POST /api/trends/analyze`, compare clustered versus noise reports, and retain multiple location runs.
+### The agricultural data shape
+
+- **The number of outbreaks is unknown.** Kuttanad may have zero, one, or several simultaneous disease hotspots. K-Means requires us to choose `K` in advance, while DBSCAN discovers the number of dense regions from the reports.
+- **An isolated report should not trigger an outbreak alert.** DBSCAN labels sparse observations as `label == -1` noise. This prevents one unusual or mistaken farmer report from creating a regional warning.
+- **Fields have irregular shapes.** Paddy plots follow padasekharams, canals, bunds, and waterways rather than square grid cells. DBSCAN can discover arbitrarily shaped clusters, including clusters that stretch along a canal.
+- **GPS coordinates need geographic distance.** Reports are latitude/longitude points, so the trend endpoint uses Haversine distance instead of treating degrees as flat Cartesian coordinates.
+- **Outbreaks are about density, not proximity alone.** A few points inside a broad circle are not automatically an outbreak. DBSCAN asks whether enough observations exist within local neighborhoods to form a meaningful dense region.
+
+### Why DBSCAN instead of common alternatives?
+
+| Requirement | K-Means | Radius-only grouping | DBSCAN in Karshakan Lens |
+|---|---|---|---|
+| Know the number of outbreaks beforehand | Required | Not explicit, but difficult to interpret | Not required |
+| Keep isolated reports as noise | Poor fit | Usually no | Yes, `label == -1` |
+| Follow irregular canal and field shapes | Limited | Depends on one circle | Yes, density-based arbitrary shapes |
+| Use geographic distance | Possible with extra work | Yes | Natural with Haversine distance |
+| Detect changing outbreak counts over time | Awkward | Weak | Natural for sliding windows |
+
+The interactive trend endpoint uses a 7-day current window, a prior comparison window, `eps` configurable by the request (default `2.0 km`), and `min_samples=3`. In practical terms, `eps` defines the geographic neighborhood and `min_samples=3` requires enough nearby reports for a dense signal. The map feed uses configured overview defaults.
+
+Users can choose a GPS point, map point, or padasekharam preset, run `POST /api/trends/analyze`, compare clustered reports with isolated noise, and retain multiple location runs. The result is an early-warning pipeline rather than an automatic declaration:
+
+```text
+AI leaf diagnosis or field report
+              ↓
+Haversine DBSCAN hotspot detection
+              ↓
+Potential crop-disease outbreak cluster
+              ↓
+Community confirmation
+              ↓
+Krishi Bhavan officer verification
+              ↓
+Trusted outbreak alert and KAU action plan
+```
+
+The key judge-facing justification is: **“We are not using DBSCAN just because it is an ML algorithm. The concept of an outbreak is inherently a density problem: multiple related observations concentrated in a geographic region should become a hotspot, while isolated observations should not automatically trigger an alarm.”**
+
+DBSCAN does not prove that a biological outbreak exists. It identifies spatially dense report clusters for prioritised investigation; the trust workflow and officer verification determine whether the signal becomes a trusted alert.
 
 ## User Flows
 
