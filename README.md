@@ -236,12 +236,7 @@ Place final screenshots in `docs/screenshots/` using the filenames below. These 
 
 <img width="1521" height="713" alt="image" src="https://github.com/user-attachments/assets/e1d117f9-d8be-4111-b87e-a865e1e402a6" />
 
-### Capture Tips
 
-- Use a clean 1440x900 or 1280x800 browser viewport.
-- Capture the app only; exclude browser tabs, API keys, phone numbers, and personal GPS details.
-- Prefer one screenshot per capability, with the important panel fully visible.
-- For the strongest demo set, capture Pulincunnoo, Alappuzha, Kumarakom, or Palakkad as the selected trend location.
 
 ## Database
 
