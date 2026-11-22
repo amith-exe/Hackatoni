@@ -34,9 +34,11 @@ The practical problem is not only diagnosis. It is knowing when several observat
 - **Human validation:** reports become `community_confirmed` after two unique peer confirmations and can then be officially verified.
 - **Decision view:** the Live Map and “What's Spreading Now” panel show current versus previous counts, cluster centers, affected areas, and actions.
 
-## Other Kuttanad Problems
+## Other Alappuzha Problems
 
 Kuttanad spans Alappuzha and Kottayam districts of Kerala and is widely known for below-sea-level farming. Paddy is cultivated inside embanked polders called *padasekharams*, often around 1.5–2.5 metres below sea level, with interconnected canals and Vembanad Lake controlling the water system.
+
+Alappuzha combines lowland paddy fields, backwaters, canals, embanked farms, livestock, and coastal water systems. The Kuttanad belt is one important part of the district; these wider agricultural and environmental risks affect farmers across Alappuzha.
 
 ### Problems and Solutions
 
